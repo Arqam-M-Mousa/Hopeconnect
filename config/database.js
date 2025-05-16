@@ -83,7 +83,47 @@ class DatabaseConnection {
             process.exit(1);
         }
     }
+
+    static async executeTransaction(callback, options = {}) {
+        const defaultOptions = {
+            isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.READ_COMMITTED, retry: {
+                max: 3,
+                match: [/Deadlock/i, /Lock wait timeout exceeded/i, /could not serialize access/i],
+                backoffBase: 1000,
+                backoffExponent: 1.5
+            }
+        };
+
+        const transactionOptions = {...defaultOptions, ...options};
+        let attempt = 0;
+
+        while (true) {
+            const transaction = await sequelize.transaction(transactionOptions);
+
+            try {
+                const result = await callback(transaction);
+                await transaction.commit();
+                return result;
+            } catch (error) {
+                await transaction.rollback();
+
+                const shouldRetry = transactionOptions.retry.match.some(pattern => pattern.test(error.message));
+
+                if (!shouldRetry || attempt >= transactionOptions.retry.max) {
+                    throw error;
+                }
+
+                const delay = transactionOptions.retry.backoffBase * Math.pow(transactionOptions.retry.backoffExponent, attempt);
+
+                console.log(`Transaction failed, retrying in ${delay}ms... (Attempt ${attempt + 1}/${transactionOptions.retry.max})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+
+                attempt++;
+            }
+        }
+    }
 }
+
 
 process.on('SIGINT', async () => {
     await DatabaseConnection.disconnect();
