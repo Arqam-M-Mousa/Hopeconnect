@@ -4,12 +4,11 @@ const {formatPaginatedResponse, getPaginationParams} = require('../utils/paginat
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 
 
-exports.createOrphan  = async (req, res) => {
+exports.createOrphan = async (req, res) => {
     try {
         const newOrphan = await Orphan.create(req.body);
         res.status(HTTP_STATUS.CREATED).json({
-            message: "Orphan created successfully",
-            orphanage: newOrphan
+            message: "Orphan created successfully", orphanage: newOrphan
         });
     } catch (error) {
         handleError(res, error);
@@ -17,29 +16,23 @@ exports.createOrphan  = async (req, res) => {
 };
 
 exports.getOrphansForSponsorship = async (req, res) => {
-    try{
-    const { page, limit, offset } = getPaginationParams(req.query);
-    const result = await Orphan.findAndCountAll({
-        where: {isAvailableForSponsorship: true},
-        limit,
-        offset,
-        order: [["createdAt", "DESC"]]
-    });
+    try {
+        const {page, limit, offset} = getPaginationParams(req.query);
+        const result = await Orphan.findAndCountAll({
+            where: {isAvailableForSponsorship: true}, limit, offset, order: [["createdAt", "DESC"]]
+        });
 
-    res.status(HTTP_STATUS.OK).json({
-        result,
-        totalPages: Math.ceil(result.count / limit),
-        currentPage: page,
-        totalOrphans: result.count
-    });
-    if (!result.rows.length) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });
+        res.status(HTTP_STATUS.OK).json({
+            result, totalPages: Math.ceil(result.count / limit), currentPage: page, totalOrphans: result.count
+        });
+        if (!result.rows.length) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
+        }
+
+        res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
+    } catch (error) {
+        handleError(res, error);
     }
-
-    res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
-} catch (error) {
-    handleError(res, error);
-}
 };
 
 exports.getOrphanById = async (req, res) => {
@@ -47,7 +40,7 @@ exports.getOrphanById = async (req, res) => {
         const orphan = await Orphan.findByPk(req.params.id);
 
         if (!orphan) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphanage not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphanage not found"});
         }
 
         res.status(HTTP_STATUS.OK).json(orphan);
@@ -61,7 +54,7 @@ exports.deleteOrphan = async (req, res) => {
         const orphan = await Orphan.findByPk(req.params.id);
 
         if (!orphan) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }
 
         await orphan.destroy();
@@ -73,41 +66,35 @@ exports.deleteOrphan = async (req, res) => {
     }
 };
 
-exports.updateOrphan  = async (req, res) => {
+exports.updateOrphan = async (req, res) => {
     try {
         const orphan = await Orphan.findByPk(req.params.id);
 
         if (!orphan) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }
 
         await orphan.update(req.body);
         res.status(HTTP_STATUS.OK).json({
-            message: "Orphan updated successfully",
-            orphan
+            message: "Orphan updated successfully", orphan
         });
     } catch (error) {
         handleError(res, error);
     }
 };
 
-exports.getOrphans  = async (req, res) => {
+exports.getOrphans = async (req, res) => {
     try {
-        const { page, limit, offset } = getPaginationParams(req.query);
+        const {page, limit, offset} = getPaginationParams(req.query);
         const result = await Orphan.findAndCountAll({
-            limit,
-            offset,
-            order: [["createdAt", "DESC"]]
+            limit, offset, order: [["createdAt", "DESC"]]
         });
 
         res.status(HTTP_STATUS.OK).json({
-            orphans,
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
-            totalOrphans: count
+            orphans, totalPages: Math.ceil(count / limit), currentPage: page, totalOrphans: count
         });
         if (!result.rows.length) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }
 
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));

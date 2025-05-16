@@ -7,8 +7,8 @@ const userRoutes = require('./user');
 const SponsorshipRoute = require('./sponsorship');
 
 router.use('/orphanages', orphanageRoutes);
-router.use('/orphan' , orphanRoutes);
-router.use('/user' , userRoutes);
-router.use('/sponsorship' , SponsorshipRoute);
+router.use('/orphan', orphanRoutes);
+router.use('/user', userRoutes);
+router.use('/sponsorship', SponsorshipRoute);
 
 module.exports = router;

@@ -27,7 +27,7 @@ app.use(cors());
 app.use(helmet());
 app.use(limiter)
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -40,14 +40,13 @@ app.use(`${API_PREFIX}`, routes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.status(200).json({status: 'OK', timestamp: new Date().toISOString()});
 });
 
 // 404 Handler
 app.use((req, res) => {
     res.status(404).json({
-        status: 'error',
-        message: 'Resource not found'
+        status: 'error', message: 'Resource not found'
     });
 });
 
@@ -69,7 +68,7 @@ const startServer = async () => {
 
         // Sync database models (in development)
         if (process.env.NODE_ENV === 'development') {
-            await sequelize.sync({ alter: true });
+            await sequelize.sync({alter: true});
             console.log('Database models synchronized.');
         }
 

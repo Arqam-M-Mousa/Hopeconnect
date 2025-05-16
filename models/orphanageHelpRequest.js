@@ -5,7 +5,9 @@ const orphanageHelpRequest = sequelize.define('orphanageHelpRequest', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, title: {
-        type: DataTypes.STRING, allowNull: false
+        type: DataTypes.STRING, allowNull: false, validate: {
+            len: [5, 150]
+        }
     }, description: {
         type: DataTypes.TEXT, allowNull: false
     }, requestType: {
@@ -21,8 +23,12 @@ const orphanageHelpRequest = sequelize.define('orphanageHelpRequest', {
     }, status: {
         type: DataTypes.ENUM('open', 'in_progress', 'completed', 'cancelled'), defaultValue: 'open'
     }, orphanageId: {
-        type: DataTypes.INTEGER, allowNull: false
+        type: DataTypes.INTEGER, allowNull: false, references: {
+            model: 'orphanages', key: 'id'
+        }
     }
+}, {
+    timestamps: true
 });
 
 module.exports = orphanageHelpRequest;
