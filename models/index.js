@@ -4,9 +4,6 @@ const Orphan = require("./orphan");
 const User = require("./user");
 const Sponsorship = require("./sponsorship");
 
-//Orphanage.hasMany(orphan, { foreignKey: "orphanageId" });
-//orphan.belongsTo(Orphanage, { foreignKey: "orphanageId" });
-
 Orphanage.hasMany(OrphanageHelpRequest, { foreignKey: "orphanageId" });
 OrphanageHelpRequest.belongsTo(Orphanage, { foreignKey: "orphanageId" });
 
