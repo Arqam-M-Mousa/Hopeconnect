@@ -6,12 +6,13 @@ const {authenticate, authorize} = require('../middleware/auth');
 
 router.post('/register', service.register);
 router.post('/login', service.login);
-router.get('/profile', authenticate, service.getUserProfile);
-router.put('/profile', authenticate, service.updateUserProfile);
-router.delete('/delete', authenticate, authorize("admin"), service.deleteUser);
 
-router.get('/:id', authenticate, service.getUserById);
+router.get('/me', authenticate, service.getCurrentUserProfile);
+router.put('/me', authenticate, service.updateCurrentUserProfile);
+router.delete('me', authenticate, service.deleteCurrentUserProfile);
 
-router.get('/', authenticate, service.getUsers);
+router.delete('/:id', authenticate, authorize("admin"), service.deleteUserById);
+router.get('/:id', authenticate, authorize("admin"), service.getUserById);
+router.get('/', authenticate, authorize("admin"), service.getUsers);
 
 module.exports = router;
