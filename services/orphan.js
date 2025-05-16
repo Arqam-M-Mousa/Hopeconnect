@@ -19,7 +19,7 @@ exports.createOrphan  = async (req, res) => {
 exports.getOrphansForSponsorship = async (req, res) => {
     try{
     const { page, limit, offset } = getPaginationParams(req.query);
-    const result = await orphan.findAndCountAll({
+    const result = await Orphan.findAndCountAll({
         where: {isAvailableForSponsorship: true},
         limit,
         offset,
@@ -27,10 +27,10 @@ exports.getOrphansForSponsorship = async (req, res) => {
     });
 
     res.status(HTTP_STATUS.OK).json({
-        orphans,
-        totalPages: Math.ceil(count / limit),
+        result,
+        totalPages: Math.ceil(result.count / limit),
         currentPage: page,
-        totalOrphans: count
+        totalOrphans: result.count
     });
     if (!result.rows.length) {
         return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });

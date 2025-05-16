@@ -158,10 +158,10 @@ exports.getUsers = async function (req, res) {
         });
 
         res.status(HTTP_STATUS.OK).json({
-            users,
-            totalPages: Math.ceil(count / limit),
+            result,
+            totalPages: Math.ceil(result.count / limit),
             currentPage: page,
-            totalOrphans: count
+            totalOrphans: result.count
         });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Orphan not found" });
