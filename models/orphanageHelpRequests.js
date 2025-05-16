@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const orphanageHelpRequest = sequelize.define('orphanageHelpRequest', {
+const orphanageHelpRequests = sequelize.define('orphanageHelpRequests', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, title: {
@@ -31,4 +31,4 @@ const orphanageHelpRequest = sequelize.define('orphanageHelpRequest', {
     timestamps: true
 });
 
-module.exports = orphanageHelpRequest;
+module.exports = orphanageHelpRequests;

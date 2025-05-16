@@ -2,7 +2,7 @@ const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-const user = sequelize.define('user', {
+const users = sequelize.define('users', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, name: {
@@ -36,8 +36,8 @@ const user = sequelize.define('user', {
     }
 });
 
-user.prototype.validatePassword = async function (password) {
+users.prototype.validatePassword = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
 
-module.exports = user;
+module.exports = users;

@@ -63,9 +63,9 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.getUserProfile = async (req, res) => {
+exports.getCurrentUserProfile = async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId, {
+        const user = await User.findByPk(req.user.id, {
             attributes: {exclude: ['password']}
         });
 
@@ -87,9 +87,9 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
-exports.updateUserProfile = async (req, res) => {
+exports.updateCurrentUserProfile = async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
+        const user = await User.findByPk(req.user.id);
         if (!user) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'User not found'});
         }
@@ -122,7 +122,20 @@ exports.updateUserProfile = async (req, res) => {
     }
 };
 
-exports.deleteUser = async (req, res) => {
+exports.deleteCurrentUserProfile = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user.id);
+
+        if (!user) return res.status(404).json({message: 'User not found'});
+
+        await user.destroy();
+        res.json({message: 'Your account has been deleted'});
+    } catch (error) {
+        handleError(res, error);
+    }
+}
+
+exports.deleteUserById = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
 

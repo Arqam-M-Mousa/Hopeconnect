@@ -6,7 +6,6 @@ const {authenticate, authorize} = require('../middleware/auth');
 // Static/specific routes first
 router.get("/statistics", service.getStatistics);
 router.get("/help-requests", service.getHelpRequests);
-router.post("/create", authenticate, authorize("admin"), service.createOrphanage);
 
 // Parametric routes for orphanages
 router.get("/:id", service.getOrphanageById);
@@ -22,5 +21,6 @@ router.delete("/:id/help-requests/:requestId", authenticate, authorize("admin"),
 
 // Most generic route last
 router.get("/", service.getOrphanages);
+router.post("/", authenticate, authorize("admin"), service.createOrphanage);
 
 module.exports = router;

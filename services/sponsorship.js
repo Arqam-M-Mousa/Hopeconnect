@@ -5,53 +5,65 @@ const {HTTP_STATUS, handleError} = require('../utils/responses');
 
 exports.createSponsorship = async (req, res) => {
     try {
-        const orphan = await Orphan.findByPk(req.body.orphanId);
-        if (!orphan) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Orphan not found'});
+        if (!req.body.orphanId || !req.body.frequency) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+                message: 'Missing required fields'
+            });
         }
 
-        if (!orphan.isAvailableForSponsorship) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'This orphan is not available for sponsorship'});
-        }
+        const result = await DatabaseConnection.executeTransaction(async (transaction) => {
+            const orphan = await Orphan.findByPk(req.body.orphanId, {
+                lock: true, transaction
+            });
+            if (!orphan) {
+                return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Orphan not found'});
+            }
 
-        const startDate = new Date();
-        let nextPaymentDate = new Date(startDate);
+            if (!orphan.isAvailableForSponsorship) {
+                return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'This orphan is not available for sponsorship'});
+            }
 
-        switch (req.body.frequency) {
-            case 'monthly':
-                nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
-                break;
-            case 'quarterly':
-                nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
-                break;
-            case 'yearly':
-                nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1);
-                break;
-            case 'one-time':
-                nextPaymentDate = null;
-                break;
-        }
+            const startDate = new Date();
+            let nextPaymentDate = new Date(startDate);
 
-        const sponsorship = await Sponsorship.create(req.body);
+            switch (req.body.frequency) {
+                case 'monthly':
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+                    break;
+                case 'quarterly':
+                    nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 3);
+                    break;
+                case 'yearly':
+                    nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1);
+                    break;
+                case 'one-time':
+                    nextPaymentDate = null;
+                    break;
+                default:
+                    return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'Invalid frequency value'});
 
-        //Todo create the donation
+            }
 
+            const sponsorship = await Sponsorship.create({
+                ...req.body, sponsorId: req.user.id, startDate, nextPaymentDate, status: 'active'
+            }, {transaction});
 
-        await SponsorshipUpdate.create({
-            sponsorshipId: sponsorship.id,
-            updateType: 'status_change',
-            title: 'Sponsorship Started',
-            content: `You have successfully started sponsoring ${orphan.name}. Thank you for your generosity!`,
-            createdBy: req.userId
+            await orphan.update({
+                isAvailableForSponsorship: false, currentSponsorshipId: sponsorship.id
+            }, {transaction});
+
+            return {sponsorship, orphanName: orphan.name};
         });
 
         res.status(HTTP_STATUS.CREATED).json({
-            message: 'Sponsorship created successfully', sponsorship
+            message: `Sponsorship created successfully for ${result.orphanName}`, sponsorship: result.sponsorship
         });
+
     } catch (error) {
-        handleError(error);
+        handleError(res, error);
     }
 };
+
 
 exports.getSponsorshipById = async (req, res) => {
     try {
@@ -69,25 +81,61 @@ exports.getSponsorshipById = async (req, res) => {
 
 exports.updateSponsorship = async (req, res) => {
     try {
-        const sponsorship = await Sponsorship.findOne({
-            where: {
-                id: req.body.sponsorshipId, sponsorId: req.userId
-            }, include: [{model: Orphan, attributes: ['name']}]
+        if (!req.body.sponsorshipId) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+                message: 'Sponsorship ID is required'
+            });
+        }
+        const result = await DatabaseConnection.executeTransaction(async (transaction) => {
+            const sponsorship = await Sponsorship.findOne({
+                where: {
+                    id: req.body.sponsorshipId, sponsorId: req.user.id
+                }, include: [{
+                    model: Orphan, attributes: ['id', 'name']
+                }], lock: true, transaction
+            });
+
+            if (!sponsorship) {
+                return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Sponsorship not found or not authorized'});
+            }
+
+            if (req.body.status === 'ended') {
+                req.body.endDate = (!req.body.endDate) ? new Date() : req.body.endDate;
+                await sponsorship.Orphan.update({
+                    isAvailableForSponsorship: true, currentSponsorshipId: null
+                }, {transaction});
+
+            }
+            await sponsorship.update(req.body, {transaction});
+
+            return sponsorship;
         });
 
-        if (!sponsorship) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Sponsorship not found or not authorized'});
-        }
-
-        await sponsorship.update(req.body);
         res.status(HTTP_STATUS.OK).json({
-            message: 'Sponsorship updated successfully', sponsorship
+            message: 'Sponsorship updated successfully', sponsorship: result
         });
     } catch (error) {
-        handleError(error);
+        handleError(res, error);
     }
 };
+exports.deleteSponsorship = async (req, res) => {
+    try {
+        const sponsorship = await Sponsorship.findByPk(req.params.id);
 
+        if (!sponsorship) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Sponsorship not found'});
+        }
+
+        if (sponsorship.sponsorId !== req.user.id) {
+            return res.status(HTTP_STATUS.FORBIDDEN).json({message: 'Forbidden: not your sponsorship'});
+        }
+
+        await sponsorship.destroy();
+        res.json({message: 'Sponsorship deleted'});
+    } catch (error) {
+        res.status(HTTP_STATUS.SERVER_ERROR).json({message: 'Server error', error});
+    }
+};
 exports.getSponsorships = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -95,9 +143,6 @@ exports.getSponsorships = async (req, res) => {
             where: {isAvailableForSponsorship: true}, limit, offset, order: [["createdAt", "DESC"]]
         });
 
-        res.status(HTTP_STATUS.OK).json({
-            result, totalPages: Math.ceil(result.count / limit), currentPage: page, totalOrphans: result.count
-        });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "sponsorships not found"});
         }
