@@ -14,8 +14,7 @@ const authenticate = async (req, res, next) => {
 
         if (!authHeader) {
             return res.status(401).json({
-                status: 'error',
-                message: 'No Authorization header found'
+                status: 'error', message: 'No Authorization header found'
             });
         }
 
@@ -23,8 +22,7 @@ const authenticate = async (req, res, next) => {
 
         if (bearer !== 'Bearer' || !token) {
             return res.status(401).json({
-                status: 'error',
-                message: 'Invalid Authorization header format'
+                status: 'error', message: 'Invalid Authorization header format'
             });
         }
 
@@ -36,39 +34,33 @@ const authenticate = async (req, res, next) => {
 
         if (!user) {
             return res.status(401).json({
-                status: 'error',
-                message: 'User not found'
+                status: 'error', message: 'User not found'
             });
         }
 
         req.user = {
-            id: user.id,
-            role: user.role
+            id: user.id, role: user.role
         };
 
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {
             return res.status(401).json({
-                status: 'error',
-                message: 'Invalid token'
+                status: 'error', message: 'Invalid token'
             });
         }
 
         return res.status(500).json({
-            status: 'error',
-            message: 'Internal server error'
+            status: 'error', message: 'Internal server error'
         });
     }
 };
 
-
-const checkRole = (roles) => {
+const authorize = (roles) => {
     return (req, res, next) => {
         if (!req.user?.role) {
             return res.status(403).json({
-                status: 'error',
-                message: 'Access denied: No role information'
+                status: 'error', message: 'Access denied: No role information'
             });
         }
 
@@ -76,14 +68,12 @@ const checkRole = (roles) => {
             next();
         } else {
             res.status(403).json({
-                status: 'error',
-                message: `Access denied: Required role(s): ${roles.join(', ')}`
+                status: 'error', message: `Access denied: Required role(s): ${roles.join(', ')}`
             });
         }
     };
 };
 
 module.exports = {
-    authenticate,
-    checkRole
+    authenticate, authorize
 };

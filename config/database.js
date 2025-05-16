@@ -3,12 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const requiredEnvVars = [
-    'DATABASE_NAME',
-    'DATABASE_USERNAME',
-    'DATABASE_PASSWORD',
-    'DATABASE_HOST'
-];
+const requiredEnvVars = ['DATABASE_NAME', 'DATABASE_USERNAME', 'DATABASE_PASSWORD', 'DATABASE_HOST'];
 
 requiredEnvVars.forEach(varName => {
     if (!process.env[varName]) {
@@ -38,8 +33,7 @@ const config = {
     // SSL configuration for production
     dialectOptions: {
         ssl: process.env.NODE_ENV === 'production' ? {
-            require: true,
-            rejectUnauthorized: false
+            require: true, rejectUnauthorized: false
         } : false
     }
 };
@@ -54,7 +48,7 @@ class DatabaseConnection {
 
             // Sync models if in development (be careful with this in production!)
             if (process.env.NODE_ENV === 'development' && process.env.SYNC_DATABASE === 'true') {
-                await sequelize.sync({ alter: true });
+                await sequelize.sync({alter: true});
                 console.log('✅ Database models synchronized.');
             }
         } catch (error) {
