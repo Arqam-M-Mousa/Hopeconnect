@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
-app.use(`${API_PREFIX}/orphanages`, routes);
+app.use(`${API_PREFIX}`, routes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
