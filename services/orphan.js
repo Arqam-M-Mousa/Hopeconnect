@@ -1,5 +1,4 @@
 const {Orphan} = require('../models/index.js');
-const sequelize = require('../config/database');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 
@@ -15,16 +14,13 @@ exports.createOrphan = async (req, res) => {
     }
 };
 
-exports.getOrphansForSponsorship = async (req, res) => {
+exports.getOrphansAvailableForSponsorship = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
         const result = await Orphan.findAndCountAll({
             where: {isAvailableForSponsorship: true}, limit, offset, order: [["createdAt", "DESC"]]
         });
 
-        res.status(HTTP_STATUS.OK).json({
-            result, totalPages: Math.ceil(result.count / limit), currentPage: page, totalOrphans: result.count
-        });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }
@@ -90,9 +86,6 @@ exports.getOrphans = async (req, res) => {
             limit, offset, order: [["createdAt", "DESC"]]
         });
 
-        res.status(HTTP_STATUS.OK).json({
-            orphans, totalPages: Math.ceil(count / limit), currentPage: page, totalOrphans: count
-        });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }
