@@ -26,7 +26,7 @@ exports.getOrphansForSponsorship = async (req, res) => {
         order: [["createdAt", "DESC"]]
     });
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         orphans,
         totalPages: Math.ceil(count / limit),
         currentPage: page,
@@ -100,7 +100,7 @@ exports.getOrphans  = async (req, res) => {
             order: [["createdAt", "DESC"]]
         });
 
-        res.status(200).json({
+        res.status(HTTP_STATUS.OK).json({
             orphans,
             totalPages: Math.ceil(count / limit),
             currentPage: page,
