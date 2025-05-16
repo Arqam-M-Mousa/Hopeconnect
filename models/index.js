@@ -1,8 +1,8 @@
-const Orphanage = require("./orphanage");
-const OrphanageHelpRequest = require("./orphanageHelpRequest");
-const Orphan = require("./orphan");
-const User = require("./user");
-const Sponsorship = require("./sponsorship");
+const Orphanage = require("./orphanages");
+const OrphanageHelpRequest = require("./orphanageHelpRequests");
+const Orphan = require("./orphans");
+const User = require("./users");
+const Sponsorship = require("./sponsorships");
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
 OrphanageHelpRequest.belongsTo(Orphanage, {foreignKey: "orphanageId"});

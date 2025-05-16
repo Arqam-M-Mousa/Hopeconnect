@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const sponsorship = sequelize.define('sponsorship', {
+const sponsorships = sequelize.define('sponsorships', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, sponsorId: {
@@ -29,4 +29,4 @@ const sponsorship = sequelize.define('sponsorship', {
     }
 });
 
-module.exports = sponsorship;
+module.exports = sponsorships;
