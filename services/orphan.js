@@ -1,5 +1,5 @@
 const {Orphan} = require('../models/index.js');
-// const sequelize = require('../config/database');
+const sequelize = require('../config/database');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 
@@ -54,7 +54,7 @@ exports.getOrphanById = async (req, res) => {
     } catch (error) {
         handleError(res, error);
     }
-}
+};
 
 exports.deleteOrphan = async (req, res) => {
     try {
@@ -94,7 +94,7 @@ exports.updateOrphan  = async (req, res) => {
 exports.getOrphans  = async (req, res) => {
     try {
         const { page, limit, offset } = getPaginationParams(req.query);
-        const result = await orphan.findAndCountAll({
+        const result = await Orphan.findAndCountAll({
             limit,
             offset,
             order: [["createdAt", "DESC"]]
