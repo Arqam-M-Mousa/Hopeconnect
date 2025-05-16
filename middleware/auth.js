@@ -8,7 +8,7 @@ if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in environment variables');
 }
 
-exports.authenticate = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.header('Authorization');
 
@@ -63,7 +63,7 @@ exports.authenticate = async (req, res, next) => {
 };
 
 
-exports.checkRole = (roles) => {
+const checkRole = (roles) => {
     return (req, res, next) => {
         if (!req.user?.role) {
             return res.status(403).json({
@@ -81,4 +81,9 @@ exports.checkRole = (roles) => {
             });
         }
     };
+};
+
+module.exports = {
+    authenticate,
+    checkRole
 };
