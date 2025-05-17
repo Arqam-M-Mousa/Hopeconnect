@@ -53,7 +53,7 @@ exports.deleteCurrentVolunteerProfile = async (req, res) => {
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
-        res.json({message: 'Your account has been deleted'});
+        res.status(HTTP_STATUS.OK).json({message: 'Your account has been deleted'});
     } catch (error) {
         handleError(res, error);
     }
@@ -63,7 +63,7 @@ exports.getVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
-        res.json(volunteer);
+        res.status(HTTP_STATUS.OK).json(volunteer);
     } catch (error) {
         handleError(res, error);
     }
@@ -75,7 +75,7 @@ exports.deleteVolunteerById = async (req, res) => {
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
-        res.json({message: 'Volunteer deleted'});
+        res.status(HTTP_STATUS.OK).json({message: 'Volunteer deleted'});
     } catch (error) {
         handleError(res, error);
     }
@@ -88,7 +88,7 @@ exports.verifyVolunteer = async (req, res) => {
 
         volunteer.verified = true;
         await volunteer.save();
-        res.json({message: 'Volunteer verified'});
+        res.status(HTTP_STATUS.OK).json({message: 'Volunteer verified'});
     } catch (error) {
         handleError(res, error);
     }
@@ -120,7 +120,7 @@ exports.searchVolunteers = async (req, res) => {
             }]
         });
 
-        res.json(volunteers);
+        res.status(HTTP_STATUS.OK).json(volunteers);
     } catch (error) {
         handleError(res, error);
     }
@@ -144,7 +144,7 @@ exports.updateVolunteerById = async (req, res) => {
 
         await volunteer.save();
 
-        res.status(200).json({
+        res.status(HTTP_STATUS.OK).json({
             message: 'Volunteer updated successfully', volunteer
         });
     } catch (error) {
@@ -179,7 +179,7 @@ exports.getVolunteerApplications = async (req, res) => {
             where: {volunteerId}, include: [OrphanageHelpRequest]
         })
 
-        return res.json(applications);
+        return res.status(HTTP_STATUS.OK).json(applications);
     } catch (error) {
         handleError(res, error);
     }
@@ -198,7 +198,7 @@ exports.cancelApplication = async (req, res) => {
 
         await application.destroy();
 
-        return res.json({message: 'Application cancelled successfully'});
+        return res.status(HTTP_STATUS.OK).json({message: 'Application cancelled successfully'});
     } catch (error) {
         handleError(res, error);
     }
