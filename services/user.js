@@ -160,9 +160,6 @@ exports.getUsers = async function (req, res) {
             limit, offset, order: [["createdAt", "DESC"]]
         });
 
-        res.status(HTTP_STATUS.OK).json({
-            result, totalPages: Math.ceil(result.count / limit), currentPage: page, totalOrphans: result.count
-        });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }

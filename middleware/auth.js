@@ -68,7 +68,7 @@ const authorize = (roles) => {
             next();
         } else {
             res.status(403).json({
-                status: 'error', message: `Access denied: Required role(s): ${roles.join(', ')}`
+                status: 'error', message: `Access denied: Required role(s): ${roles}`
             });
         }
     };
