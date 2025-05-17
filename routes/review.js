@@ -4,7 +4,7 @@ const service = require('../services/review');
 const {authenticate, authorize} = require('../middleware/auth');
 
 
-router.get('/reviews/:id', authenticate , service.getReviewById);
+router.get('/:id', authenticate , service.getReviewById);
 
 router.get('/' , authenticate, service.getReviews);
 router.post('/' , authenticate , authorize("donor") , service.postReview);
