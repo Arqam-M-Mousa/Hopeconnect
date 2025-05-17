@@ -1,7 +1,7 @@
-const { Volunteer,OrphanageHelpRequest } = require('../models');
-const { Op } = require('sequelize');
-const { formatPaginatedResponse, getPaginationParams } = require('../utils/pagination');
-const { HTTP_STATUS, handleError } = require('../utils/responses');
+const {Volunteer, OrphanageHelpRequest, VolunteerHelpRequest} = require('../models');
+const {Op} = require('sequelize');
+const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
+const {HTTP_STATUS, handleError} = require('../utils/responses');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -9,13 +9,12 @@ dotenv.config();
 exports.getCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id, {
-            attributes: { exclude: ['password'] }
+            attributes: {exclude: ['password']}
         });
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         res.status(HTTP_STATUS.OK).json({
-            message: 'Profile fetched successfully',
-            volunteer
+            message: 'Profile fetched successfully', volunteer
         });
 
     } catch (error) {
@@ -25,16 +24,12 @@ exports.getCurrentVolunteerProfile = async (req, res) => {
 
 exports.updateCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id);
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        const volunteer = await Volunteer.findByPk(req.user.id, {
+            attributes: {exclude: ['password']}
+        });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
-        const updatableFields = [
-            'servicesOffered',
-            'availability',
-            'preferredLocation',
-            'skills',
-            'experience'
-        ];
+        const updatableFields = ['servicesOffered', 'availability', 'preferredLocation', 'skills', 'experience'];
 
         updatableFields.forEach(field => {
             if (req.body[field] !== undefined) {
@@ -45,8 +40,7 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
         await volunteer.save();
 
         res.status(HTTP_STATUS.OK).json({
-            message: 'Profile updated successfully',
-            volunteer
+            message: 'Profile updated successfully', volunteer
         });
     } catch (error) {
         handleError(res, error);
@@ -56,10 +50,10 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
 exports.deleteCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id);
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
-        res.json({ message: 'Your account has been deleted' });
+        res.json({message: 'Your account has been deleted'});
     } catch (error) {
         handleError(res, error);
     }
@@ -68,7 +62,7 @@ exports.deleteCurrentVolunteerProfile = async (req, res) => {
 exports.getVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
         res.json(volunteer);
     } catch (error) {
         handleError(res, error);
@@ -78,10 +72,10 @@ exports.getVolunteerById = async (req, res) => {
 exports.deleteVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
-        res.json({ message: 'Volunteer deleted' });
+        res.json({message: 'Volunteer deleted'});
     } catch (error) {
         handleError(res, error);
     }
@@ -90,11 +84,11 @@ exports.deleteVolunteerById = async (req, res) => {
 exports.verifyVolunteer = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         volunteer.verified = true;
         await volunteer.save();
-        res.json({ message: 'Volunteer verified' });
+        res.json({message: 'Volunteer verified'});
     } catch (error) {
         handleError(res, error);
     }
@@ -102,11 +96,9 @@ exports.verifyVolunteer = async (req, res) => {
 
 exports.getVolunteers = async (req, res) => {
     try {
-        const { page, limit, offset } = getPaginationParams(req.query);
+        const {page, limit, offset} = getPaginationParams(req.query);
         const result = await Volunteer.findAndCountAll({
-            limit,
-            offset,
-            order: [['createdAt', 'DESC']]
+            limit, offset, order: [['createdAt', 'DESC']]
         });
 
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
@@ -116,22 +108,16 @@ exports.getVolunteers = async (req, res) => {
 };
 
 
-
 exports.searchVolunteers = async (req, res) => {
     try {
-        const { skill, availability } = req.query;
+        const {skill, availability} = req.query;
 
         const volunteers = await Volunteer.findAll({
             where: {
-                ...(availability && { availability }),
-            },
-            include: [
-                {
-                    model: VolunteerService,
-                    where: skill ? { name: { [Op.like]: `%${skill}%` } } : {},
-                    required: !!skill
-                }
-            ]
+                ...(availability && {availability}),
+            }, include: [{
+                model: Volunteer, where: skill ? {name: {[Op.like]: `%${skill}%`}} : {}, required: !!skill
+            }]
         });
 
         res.json(volunteers);
@@ -141,19 +127,14 @@ exports.searchVolunteers = async (req, res) => {
 };
 exports.updateVolunteerById = async (req, res) => {
     try {
-        const volunteerId = req.params.id;
-        const volunteer = await Volunteer.findByPk(volunteerId);
+        const volunteer = await Volunteer.findByPk(req.params.id, {
+            attributes: {exclude: ['password']}
+        });
         if (!volunteer) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
         }
 
-        const allowedFields = [
-            'servicesOffered',
-            'availability',
-            'preferredLocation',
-            'skills',
-            'experience'
-        ];
+        const allowedFields = ['servicesOffered', 'availability', 'preferredLocation', 'skills', 'experience'];
 
         allowedFields.forEach(field => {
             if (req.body[field] !== undefined) {
@@ -164,11 +145,10 @@ exports.updateVolunteerById = async (req, res) => {
         await volunteer.save();
 
         res.status(200).json({
-            message: 'Volunteer updated successfully',
-            volunteer
+            message: 'Volunteer updated successfully', volunteer
         });
     } catch (error) {
-       handleError(res, error);
+        handleError(res, error);
     }
 };
 
@@ -178,16 +158,16 @@ exports.applyToHelpRequest = async (req, res) => {
         const helpRequestId = req.params.id;
 
         const helpRequest = await OrphanageHelpRequest.findByPk(helpRequestId);
-        if (!helpRequest) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Help request not found' });
+        if (!helpRequest) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Help request not found'});
 
-        const existingApplication = await VolunteerHelpRequest.findOne({ where: { volunteerId, helpRequestId } });
-        if (existingApplication) return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'You already applied to this help request' });
+        const existingApplication = await VolunteerHelpRequest.findOne({where: {volunteerId, helpRequestId}});
+        if (existingApplication) return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'You already applied to this help request'});
 
-        await VolunteerHelpRequest.create({ volunteerId, helpRequestId });
+        await VolunteerHelpRequest.create({volunteerId, helpRequestId});
 
-        return res.status(HTTP_STATUS.CREATED).json({ message: 'Application submitted successfully' });
-    } catch {
-        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+        return res.status(HTTP_STATUS.CREATED).json({message: 'Application submitted successfully'});
+    } catch (error) {
+        handleError(res, error);
     }
 };
 
@@ -195,17 +175,13 @@ exports.getVolunteerApplications = async (req, res) => {
     try {
         const volunteerId = req.user.id;
 
-        const applications = await OrphanageHelpRequest.findAll({
-            include: [{
-                model: Volunteer,
-                where: { id: volunteerId },
-                attributes: []
-            }]
-        });
+        const applications = await VolunteerHelpRequest.findAll({
+            where: {volunteerId}, include: [OrphanageHelpRequest]
+        })
 
         return res.json(applications);
-    } catch {
-        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+    } catch (error) {
+        handleError(res, error);
     }
 };
 
@@ -215,16 +191,16 @@ exports.cancelApplication = async (req, res) => {
         const applicationId = req.params.applicationId;
 
         const application = await VolunteerHelpRequest.findOne({
-            where: { volunteerId, helpRequestId: applicationId }
+            where: {volunteerId, helpRequestId: applicationId}
         });
 
-        if (!application) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Application not found' });
+        if (!application) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Application not found'});
 
         await application.destroy();
 
-        return res.json({ message: 'Application cancelled successfully' });
-    } catch {
-        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+        return res.json({message: 'Application cancelled successfully'});
+    } catch (error) {
+        handleError(res, error);
     }
 };
 
@@ -235,25 +211,31 @@ exports.matchVolunteerToOpportunities = async (req, res) => {
         const volunteer = await Volunteer.findByPk(volunteerId);
 
         if (!volunteer) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
+        }
+
+        const {preferredLocation, skills, availability} = volunteer;
+
+        if (!preferredLocation || !Array.isArray(skills) || skills.length === 0 || !availability) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+                message: 'Volunteer profile is incomplete for matching (location, skills, or availability missing)'
+            });
         }
 
         const matches = await OrphanageHelpRequest.findAll({
             where: {
-                preferredLocation: volunteer.preferredLocation,
-                requiredSkills: {
-                    [Op.overlap]: volunteer.skills
-                },
-                availability: volunteer.availability
+                preferredLocation, requiredSkills: {
+                    [Op.overlap]: skills
+                }, availability
             }
         });
 
         res.status(HTTP_STATUS.OK).json({
-            message: 'Matched opportunities fetched successfully',
-            matches
+            message: 'Matched opportunities fetched successfully', matches
         });
 
     } catch (error) {
         handleError(res, error);
     }
 };
+

@@ -1,0 +1,359 @@
+/sponsorships:
+  get:
+    summary: Get orphans available for sponsorship
+    tags: [Orphan]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of orphans per page
+    responses:
+      200:
+        description: List of orphans available for sponsorship retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 50
+                totalPages:
+                  type: integer
+                  example: 5
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Orphan'
+      404:
+        description: No orphans found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}:
+  get:
+    summary: Get orphan by ID
+    tags: [Orphan]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphan to retrieve
+    responses:
+      200:
+        description: Orphan data retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Orphan'
+      404:
+        description: Orphan not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan not found
+      401:
+        description: Unauthorized - Authentication required
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete orphan by ID (admin only)
+    tags: [Orphan]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphan to delete
+    responses:
+      200:
+        description: Orphan deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan deleted successfully
+      404:
+        description: Orphan not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update orphan by ID (admin only)
+    tags: [Orphan]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphan to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: John Doe
+              age:
+                type: integer
+                example: 10
+              gender:
+                type: string
+                enum: [male, female]
+                example: male
+              educationStatus:
+                type: string
+                example: Primary School
+              healthCondition:
+                type: string
+                example: Good health
+              background:
+                type: string
+                example: Lost parents in accident
+              orphanageId:
+                type: integer
+                example: 1
+              isAvailableForSponsorship:
+                type: boolean
+                example: true
+    responses:
+      200:
+        description: Orphan updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan updated successfully
+                orphan:
+                  $ref: '#/components/schemas/Orphan'
+      404:
+        description: Orphan not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/:
+  get:
+    summary: Get paginated list of orphans
+    tags: [Orphan]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of orphans per page
+    responses:
+      200:
+        description: List of orphans retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Orphan'
+      404:
+        description: No orphans found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  post:
+    summary: Create a new orphan (admin only)
+    tags: [Orphan]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, age, gender, orphanageId]
+            properties:
+              name:
+                type: string
+                example: John Doe
+              age:
+                type: integer
+                example: 10
+              gender:
+                type: string
+                enum: [male, female]
+                example: male
+              educationStatus:
+                type: string
+                example: Primary School
+              healthCondition:
+                type: string
+                example: Good health
+              background:
+                type: string
+                example: Lost parents in accident
+              orphanageId:
+                type: integer
+                example: 1
+              profileImage:
+                type: string
+                example: /uploads/orphans/profile.jpg
+              isAvailableForSponsorship:
+                type: boolean
+                example: true
+    responses:
+      201:
+        description: Orphan created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphan created successfully
+                orphan:
+                  $ref: '#/components/schemas/Orphan'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error

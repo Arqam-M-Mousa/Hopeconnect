@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: HopeConnect API
+  version: 1.0.0
+  description: API documentation for HopeConnect application
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+paths:
+  /user:
+    $ref: './paths/user.yaml'
+  /volunteer:
+    $ref: './paths/volunteer.yaml'
+  /sponsorship:
+    $ref: './paths/sponsorship.yaml'
+  /orphan:
+    $ref: './paths/orphan.yaml'
+  /orphanage:
+    $ref: './paths/orphanage.yaml'
+  /donation:
+    $ref: './paths/donation.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        role:
+          type: string
+          example: user
+        phone:
+          type: string
+          example: "+1234567890"
+        address:
+          type: string
+          example: "123 Main St, City, Country"
+        profileImage:
+          type: string
+          format: uri
+          example: "https://example.com/images/profile.jpg"
+
+    Orphan:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        age:
+          type: integer
+          example: 10
+        gender:
+          type: string
+          enum: [male, female]
+          example: male
+        educationStatus:
+          type: string
+          example: Primary School
+        healthCondition:
+          type: string
+          example: Good health, no major issues
+        background:
+          type: string
+          example: Lost parents in accident
+        orphanageId:
+          type: integer
+          example: 1
+        profileImage:
+          type: string
+          example: /uploads/orphans/profile.jpg
+        isAvailableForSponsorship:
+          type: boolean
+          example: true
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Orphanage:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Hope Children's Home
+        address:
+          type: string
+          example: 123 Main Street, City, Country
+        contactPerson:
+          type: string
+          example: John Smith
+        phone:
+          type: string
+          example: "+1234567890"
+        email:
+          type: string
+          format: email
+          example: contact@hopechildrenshome.org
+        description:
+          type: string
+          example: A safe haven for orphaned children
+        isVerified:
+          type: boolean
+          example: true
+        rating:
+          type: number
+          format: float
+          example: 4.5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    OrphanageHelpRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Medical Supplies Needed
+        description:
+          type: string
+          example: We need basic medical supplies for our infirmary
+        requestType:
+          type: string
+          enum: [medical, educational, maintenance, supplies, other]
+          example: medical
+        urgencyLevel:
+          type: string
+          enum: [low, medium, high, critical]
+          example: high
+        requiredSkills:
+          type: string
+          example: Medical knowledge preferred
+        startDate:
+          type: string
+          format: date-time
+          example: "2023-06-01T00:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2023-06-30T00:00:00Z"
+        status:
+          type: string
+          enum: [open, in_progress, completed, cancelled]
+          example: open
+        orphanageId:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Sponsorship:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        sponsorId:
+          type: integer
+          example: 5
+        orphanId:
+          type: integer
+          example: 3
+        startDate:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2024-05-17T12:00:00Z"
+        amount:
+          type: number
+          format: float
+          example: 50.00
+        frequency:
+          type: string
+          enum: [monthly, quarterly, yearly, one-time]
+          example: monthly
+        status:
+          type: string
+          enum: [active, paused, ended]
+          example: active
+        notes:
+          type: string
+          example: "Supporting education expenses"
+
+    Volunteer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 5
+        servicesOffered:
+          type: array
+          items:
+            type: string
+          example: ["tutoring", "mentoring"]
+        availability:
+          type: string
+          example: "weekends"
+        preferredLocation:
+          type: string
+          example: "New York"
+        skills:
+          type: string
+          example: "teaching, counseling"
+        experience:
+          type: string
+          example: "5 years of teaching experience"
+        verified:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Donation:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        amount:
+          type: number
+          format: float
+          example: 100.00
+        category:
+          type: string
+          enum: [general-funds, education, medical, emergency]
+          example: education
+        donationType:
+          type: string
+          enum: [money, clothes, food, educational, other]
+          example: money
+        description:
+          type: string
+          example: "Donation for educational supplies"
+        status:
+          type: string
+          enum: [pending, completed, failed]
+          example: completed
+        donorId:
+          type: integer
+          example: 5
+        orphanageId:
+          type: integer
+          example: 1
+        sponsorshipId:
+          type: integer
+          example: 2
+        transactionId:
+          type: string
+          example: "tx_12345678"
+        createdBy:
+          type: integer
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    DonationTracking:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        donationId:
+          type: integer
+          example: 1
+        status:
+          type: string
+          enum: [received, processing, shipped, delivered, thanked]
+          example: processing
+        title:
+          type: string
+          example: "Donation Processed"
+        description:
+          type: string
+          example: "Your donation has been processed successfully."
+        imageUrl:
+          type: string
+          example: "https://example.com/images/donation-receipt.jpg"
+        isRead:
+          type: boolean
+          example: false
+        createdBy:
+          type: integer
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"

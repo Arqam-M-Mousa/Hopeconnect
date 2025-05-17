@@ -1,0 +1,755 @@
+/:
+  get:
+    summary: Get paginated list of orphanages
+    tags: [Orphanage]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of orphanages per page
+    responses:
+      200:
+        description: List of orphanages retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Orphanage'
+      404:
+        description: No orphanages found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: No orphanages found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  post:
+    summary: Create a new orphanage (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, address, contactPerson, phone]
+            properties:
+              name:
+                type: string
+                example: Hope Children's Home
+              address:
+                type: string
+                example: 123 Main Street, City, Country
+              contactPerson:
+                type: string
+                example: John Smith
+              phone:
+                type: string
+                example: "+1234567890"
+              email:
+                type: string
+                format: email
+                example: contact@hopechildrenshome.org
+              description:
+                type: string
+                example: A safe haven for orphaned children
+              isVerified:
+                type: boolean
+                example: false
+              rating:
+                type: number
+                format: float
+                example: 4.5
+    responses:
+      201:
+        description: Orphanage created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage created successfully
+                orphanage:
+                  $ref: '#/components/schemas/Orphanage'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/statistics:
+  get:
+    summary: Get orphanage statistics
+    tags: [Orphanage]
+    responses:
+      200:
+        description: Orphanage statistics retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalOrphanages:
+                  type: integer
+                  example: 50
+                verifiedOrphanages:
+                  type: integer
+                  example: 45
+                totalOrphans:
+                  type: integer
+                  example: 500
+                orphansAvailableForSponsorship:
+                  type: integer
+                  example: 300
+                activeHelpRequests:
+                  type: integer
+                  example: 25
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/help-requests:
+  get:
+    summary: Get all help requests from all orphanages
+    tags: [Orphanage]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of help requests per page
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum: [open, in_progress, completed, cancelled]
+        description: Filter by status
+      - in: query
+        name: requestType
+        schema:
+          type: string
+          enum: [medical, educational, maintenance, supplies, other]
+        description: Filter by request type
+      - in: query
+        name: urgencyLevel
+        schema:
+          type: string
+          enum: [low, medium, high, critical]
+        description: Filter by urgency level
+    responses:
+      200:
+        description: Help requests retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OrphanageHelpRequest'
+      404:
+        description: No help requests found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: No help requests found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}:
+  get:
+    summary: Get orphanage by ID
+    tags: [Orphanage]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage to retrieve
+    responses:
+      200:
+        description: Orphanage data retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Orphanage'
+      404:
+        description: Orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update orphanage by ID (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Hope Children's Home
+              address:
+                type: string
+                example: 123 Main Street, City, Country
+              contactPerson:
+                type: string
+                example: John Smith
+              phone:
+                type: string
+                example: "+1234567890"
+              email:
+                type: string
+                format: email
+                example: contact@hopechildrenshome.org
+              description:
+                type: string
+                example: A safe haven for orphaned children
+              isVerified:
+                type: boolean
+                example: true
+              rating:
+                type: number
+                format: float
+                example: 4.5
+    responses:
+      200:
+        description: Orphanage updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage updated successfully
+                orphanage:
+                  $ref: '#/components/schemas/Orphanage'
+      404:
+        description: Orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete orphanage by ID (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage to delete
+    responses:
+      200:
+        description: Orphanage deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage deleted successfully
+      404:
+        description: Orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/help-requests:
+  get:
+    summary: Get help requests for a specific orphanage
+    tags: [Orphanage]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of help requests per page
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum: [open, in_progress, completed, cancelled]
+        description: Filter by status
+    responses:
+      200:
+        description: Help requests retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 25
+                totalPages:
+                  type: integer
+                  example: 3
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OrphanageHelpRequest'
+      404:
+        description: Orphanage not found or no help requests found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: No help requests found for this orphanage
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  post:
+    summary: Create a help request for a specific orphanage (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [title, description, requestType]
+            properties:
+              title:
+                type: string
+                example: Medical Supplies Needed
+              description:
+                type: string
+                example: We need basic medical supplies for our infirmary
+              requestType:
+                type: string
+                enum: [medical, educational, maintenance, supplies, other]
+                example: medical
+              urgencyLevel:
+                type: string
+                enum: [low, medium, high, critical]
+                example: high
+              requiredSkills:
+                type: string
+                example: Medical knowledge preferred
+              startDate:
+                type: string
+                format: date-time
+                example: "2023-06-01T00:00:00Z"
+              endDate:
+                type: string
+                format: date-time
+                example: "2023-06-30T00:00:00Z"
+    responses:
+      201:
+        description: Help request created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request created successfully
+                helpRequest:
+                  $ref: '#/components/schemas/OrphanageHelpRequest'
+      404:
+        description: Orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Orphanage not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/help-requests/{requestId}:
+  get:
+    summary: Get a specific help request for an orphanage
+    tags: [Orphanage]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+      - in: path
+        name: requestId
+        required: true
+        schema:
+          type: integer
+        description: ID of the help request
+    responses:
+      200:
+        description: Help request retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrphanageHelpRequest'
+      404:
+        description: Orphanage or help request not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update a specific help request (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+      - in: path
+        name: requestId
+        required: true
+        schema:
+          type: integer
+        description: ID of the help request
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                example: Updated Medical Supplies Needed
+              description:
+                type: string
+                example: Updated description for medical supplies
+              requestType:
+                type: string
+                enum: [medical, educational, maintenance, supplies, other]
+                example: medical
+              urgencyLevel:
+                type: string
+                enum: [low, medium, high, critical]
+                example: critical
+              requiredSkills:
+                type: string
+                example: Medical knowledge required
+              startDate:
+                type: string
+                format: date-time
+                example: "2023-06-01T00:00:00Z"
+              endDate:
+                type: string
+                format: date-time
+                example: "2023-07-15T00:00:00Z"
+              status:
+                type: string
+                enum: [open, in_progress, completed, cancelled]
+                example: in_progress
+    responses:
+      200:
+        description: Help request updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request updated successfully
+                helpRequest:
+                  $ref: '#/components/schemas/OrphanageHelpRequest'
+      404:
+        description: Orphanage or help request not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete a specific help request (admin only)
+    tags: [Orphanage]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+      - in: path
+        name: requestId
+        required: true
+        schema:
+          type: integer
+        description: ID of the help request
+    responses:
+      200:
+        description: Help request deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request deleted successfully
+      404:
+        description: Orphanage or help request not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error

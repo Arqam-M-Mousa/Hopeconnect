@@ -1,0 +1,684 @@
+/:
+  get:
+    summary: Get all volunteers (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of volunteers per page
+    responses:
+      200:
+        description: List of volunteers retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Volunteer'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/search:
+  get:
+    summary: Search volunteers by skills and availability (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: query
+        name: skill
+        schema:
+          type: string
+        description: Skill to search for
+      - in: query
+        name: availability
+        schema:
+          type: string
+        description: Availability to filter by
+    responses:
+      200:
+        description: Volunteers matching the search criteria
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Volunteer'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/me:
+  get:
+    summary: Get current volunteer profile
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Volunteer profile retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Profile fetched successfully
+                volunteer:
+                  $ref: '#/components/schemas/Volunteer'
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Volunteers only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update current volunteer profile
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              servicesOffered:
+                type: array
+                items:
+                  type: string
+                example: ["tutoring", "mentoring"]
+              availability:
+                type: string
+                example: "weekends"
+              preferredLocation:
+                type: string
+                example: "New York"
+              skills:
+                type: string
+                example: "teaching, counseling"
+              experience:
+                type: string
+                example: "5 years of teaching experience"
+    responses:
+      200:
+        description: Profile updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Profile updated successfully
+                volunteer:
+                  $ref: '#/components/schemas/Volunteer'
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Volunteers only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete current volunteer profile
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Volunteer profile deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Your account has been deleted
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Volunteers only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/me/applications:
+  get:
+    summary: Get volunteer's applications
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Applications retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  volunteerId:
+                    type: integer
+                    example: 5
+                  helpRequestId:
+                    type: integer
+                    example: 3
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: "2023-05-17T12:00:00Z"
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2023-05-17T12:00:00Z"
+                  orphanageHelpRequest:
+                    $ref: '#/components/schemas/OrphanageHelpRequest'
+      401:
+        description: Unauthorized - Authentication required
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}:
+  get:
+    summary: Get volunteer by ID (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer to retrieve
+    responses:
+      200:
+        description: Volunteer retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Volunteer'
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update volunteer by ID (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              servicesOffered:
+                type: array
+                items:
+                  type: string
+                example: ["tutoring", "mentoring"]
+              availability:
+                type: string
+                example: "weekends"
+              preferredLocation:
+                type: string
+                example: "New York"
+              skills:
+                type: string
+                example: "teaching, counseling"
+              experience:
+                type: string
+                example: "5 years of teaching experience"
+    responses:
+      200:
+        description: Volunteer updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer updated successfully
+                volunteer:
+                  $ref: '#/components/schemas/Volunteer'
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete volunteer by ID (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer to delete
+    responses:
+      200:
+        description: Volunteer deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer deleted
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/verify:
+  put:
+    summary: Verify volunteer (admin only)
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer to verify
+    responses:
+      200:
+        description: Volunteer verified successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer verified
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admins only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/apply:
+  post:
+    summary: Apply to help request
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the help request to apply for
+    responses:
+      201:
+        description: Application submitted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Application submitted successfully
+      400:
+        description: Already applied to this help request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: You already applied to this help request
+      404:
+        description: Help request not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Help request not found
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Volunteers only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/applications/{applicationId}:
+  delete:
+    summary: Cancel application
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer
+      - in: path
+        name: applicationId
+        required: true
+        schema:
+          type: integer
+        description: ID of the application to cancel
+    responses:
+      200:
+        description: Application cancelled successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Application cancelled successfully
+      404:
+        description: Application not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Application not found
+      401:
+        description: Unauthorized - Authentication required
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/matches:
+  get:
+    summary: Match volunteer to opportunities
+    tags: [Volunteer]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the volunteer to match
+    responses:
+      200:
+        description: Matched opportunities retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Matched opportunities fetched successfully
+                matches:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OrphanageHelpRequest'
+      400:
+        description: Volunteer profile incomplete for matching
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer profile is incomplete for matching (location, skills, or availability missing)
+      404:
+        description: Volunteer not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Volunteer not found
+      401:
+        description: Unauthorized - Authentication required
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
