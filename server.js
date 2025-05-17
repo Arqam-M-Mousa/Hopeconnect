@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const sequelize = require('./config/database');
+const { swaggerUi, specs } = require('./config/swagger');
 
 
 // Load environment variables
@@ -28,6 +29,8 @@ app.use(helmet());
 app.use(limiter)
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -76,6 +79,8 @@ const startServer = async () => {
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
             console.log(`API is available at http://localhost:${PORT}${API_PREFIX}`);
+            console.log(`Swagger api-docs is available at http://localhost:${PORT}/api-docs/`);
+
         });
     } catch (error) {
         console.error('Unable to start server:', error);

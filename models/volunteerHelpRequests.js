@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const volunteerHelpRequest = sequelize.define('volunteerHelpRequest', {
+const volunteerHelpRequests = sequelize.define('volunteerHelpRequest', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -31,4 +31,4 @@ const volunteerHelpRequest = sequelize.define('volunteerHelpRequest', {
   timestamps: true,
 });
 
-module.exports = volunteerHelpRequest;
+module.exports = volunteerHelpRequests;

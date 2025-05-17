@@ -4,7 +4,7 @@ const Orphan = require("./orphans");
 const User = require("./users");
 const Sponsorship = require("./sponsorships");
 const Volunteer = require("./volunteers");
-const VolunteerHelpRequest = require("./volunteerHelpRequest");
+const VolunteerHelpRequest = require("./volunteerHelpRequests");
 const Donation = require("./donations");
 const DonationsTracking = require("./donationsTracking");
 
