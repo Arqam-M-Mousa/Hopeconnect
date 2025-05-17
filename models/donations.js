@@ -13,7 +13,7 @@ const Donation = sequelize.define('Donation', {
     },
     category: {
         type: DataTypes.ENUM('general-funds', 'education', 'medical', 'emergency'),
-        defaultValue: 'general'
+        defaultValue: 'general-funds'
     },
     donationType: {
         type: DataTypes.ENUM('money', 'clothes', 'food', 'educational', 'other'),

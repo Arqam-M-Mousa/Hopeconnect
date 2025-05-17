@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 
-const DonationUpdate = sequelize.define('DonationUpdate', {
+const DonationTracking = sequelize.define('DonationTracking', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -35,4 +35,4 @@ const DonationUpdate = sequelize.define('DonationUpdate', {
 
 console.log('DonationUpdate model defined successfully!');
 
-module.exports = DonationUpdate;
+module.exports = DonationTracking;
