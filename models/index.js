@@ -4,7 +4,7 @@ const Orphan = require("./orphans");
 const User = require("./users");
 const Sponsorship = require("./sponsorships");
 const Donation = require("./donations");
-const DonationTracking = require("./donationsTracking");
+const DonationsTracking = require("./donationsTracking");
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
 OrphanageHelpRequest.belongsTo(Orphanage, {foreignKey: "orphanageId"});
@@ -24,11 +24,14 @@ Donation.belongsTo(User, {foreignKey: "donorId"});
 Orphanage.hasMany(Donation, {foreignKey: "orphanageId", onDelete: 'CASCADE'});
 Donation.belongsTo(Orphanage, {foreignKey: "orphanageId"});
 
-Donation.hasMany(DonationTracking, {foreignKey: "donationId", onDelete: 'CASCADE'});
-DonationTracking.belongsTo(Donation, {foreignKey: "donationId"});
+Donation.hasMany(DonationsTracking, { foreignKey: 'donationId', onDelete: 'CASCADE' });
+DonationsTracking.belongsTo(Donation, { foreignKey: 'donationId' });
+
+Sponsorship.hasMany(Donation, { foreignKey: 'sponsorshipId', onDelete: 'SET NULL' });
+Donation.belongsTo(Sponsorship, { foreignKey: 'sponsorshipId' });
 
 const models = {
-    Orphanage, OrphanageHelpRequest, Orphan, User, Sponsorship , Donation , DonationUpdate: DonationTracking
+    Orphanage, OrphanageHelpRequest, Orphan, User, Sponsorship , Donation , DonationsTracking
 }
 
 module.exports = models;

@@ -2,7 +2,7 @@ exports.DEFAULT_PAGE_SIZE = 10;
 
 exports.getPaginationParams = (query) => {
     const page = parseInt(query.page) || 1;
-    const limit = Math.min(parseInt(query.limit) || exports.DEFAULT_PAGE_SIZE, exports.DEFAULT_PAGE_SIZE);
+    const limit = Math.min(parseInt(query.limit, 10) || exports.DEFAULT_PAGE_SIZE, exports.DEFAULT_PAGE_SIZE);
     const offset = (page - 1) * limit;
     return {page, limit, offset};
 };
