@@ -1,4 +1,4 @@
-const {User} = require('../models/index.js');
+const {User, Sponsorship , Donation , Orphan} = require('../models/index.js');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 const jwt = require('jsonwebtoken');
@@ -150,7 +150,6 @@ exports.deleteUserById = async (req, res) => {
     }
 }
 
-
 exports.getUsers = async function (req, res) {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -177,6 +176,41 @@ exports.getUserById = async function (req, res) {
         }
 
         res.status(HTTP_STATUS.OK).json(user);
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+exports.getDashboard = async  (req , res) => {
+    try {
+        const user = await User.findByPk(req.userId);
+
+        const donations = await Donation.findAll({
+            where: { donorId: req.userId }
+        });
+
+        const sponsorships = await Sponsorship.findAll({
+            where: { sponsorId: req.userId },
+            include: [{ model: Orphan, attributes: ['id', 'name', 'age', 'gender', 'profileImage'] }]
+        });
+
+        const totalDonated = donations.reduce((sum, donation) =>
+            sum + parseFloat(donation.amount), 0);
+
+        res.status(HTTP_STATUS.OK).json({
+            donorInfo: {
+                name: user.name,
+                email: user.email,
+                profileImage: user.profileImage
+            },
+            stats: {
+                totalDonations: donations.length,
+                totalDonated: totalDonated,
+                activeSponshorships: sponsorships.filter(s => s.status === 'active').length
+            },
+            recentDonations: donations.slice(-5),
+            sponsorships: sponsorships
+        });
     } catch (error) {
         handleError(res, error);
     }
