@@ -29,7 +29,20 @@ app.use(helmet());
 app.use(limiter)
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    swaggerOptions: {
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 1,
+        docExpansion: 'list',
+        filter: true,
+        displayRequestDuration: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+        defaultModelRendering: 'model',
+        showExtensions: true,
+        displayOperationId: false
+    }
+}));
 
 
 // Logging middleware

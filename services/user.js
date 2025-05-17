@@ -138,7 +138,7 @@ exports.deleteUserById = async (req, res) => {
         const user = await User.findByPk(req.params.id);
 
         if (!user) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "user not found"});
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "User not found"});
         }
 
         await user.destroy();
@@ -159,7 +159,7 @@ exports.getUsers = async function (req, res) {
         });
 
         if (!result.rows.length) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "User not found"});
         }
 
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
@@ -173,7 +173,7 @@ exports.getUserById = async function (req, res) {
         const user = await User.findByPk(req.params.id);
 
         if (!user) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "user not found"});
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "User not found"});
         }
 
         res.status(HTTP_STATUS.OK).json(user);
