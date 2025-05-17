@@ -24,7 +24,11 @@ const orphans = sequelize.define('orphans', {
         type: DataTypes.STRING
     }, isAvailableForSponsorship: {
         type: DataTypes.BOOLEAN, defaultValue: true
-    }, timestamp: true
+    }, timestamp: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    }
+
 });
 
 module.exports = orphans;
