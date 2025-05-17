@@ -181,21 +181,42 @@ exports.getUserById = async function (req, res) {
     }
 };
 
-exports.getDashboard = async  (req , res) => {
+
+const calculateDashboardStats = (donations, sponsorships) => {
+    const totalDonated = donations.reduce((sum, donation) =>
+        sum + parseFloat(donation.amount), 0);
+    return {
+        totalDonations: donations.length,
+        totalDonated: totalDonated,
+        activeSponshorships: sponsorships.filter(s => s.status === 'active').length
+    };
+};
+
+exports.getDashboard = async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
+        const {page, limit, offset} = getPaginationParams(req.query);
+        const user = await User.findByPk(req.user.id);
 
-        const donations = await Donation.findAll({
-            where: { donorId: req.userId }
+        if (!user) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'User not found'});
+        }
+
+        const donationsResult = await Donation.findAndCountAll({
+            where: {donorId: req.user.id},
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']]
         });
 
-        const sponsorships = await Sponsorship.findAll({
-            where: { sponsorId: req.userId },
-            include: [{ model: Orphan, attributes: ['id', 'name', 'age', 'gender', 'profileImage'] }]
+        const sponsorshipsResult = await Sponsorship.findAndCountAll({
+            where: {sponsorId: req.user.id},
+            include: [{model: Orphan, attributes: ['id', 'name', 'age', 'gender', 'profileImage']}],
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']]
         });
 
-        const totalDonated = donations.reduce((sum, donation) =>
-            sum + parseFloat(donation.amount), 0);
+        const stats = calculateDashboardStats(donations, sponsorships);
 
         res.status(HTTP_STATUS.OK).json({
             donorInfo: {
@@ -203,13 +224,9 @@ exports.getDashboard = async  (req , res) => {
                 email: user.email,
                 profileImage: user.profileImage
             },
-            stats: {
-                totalDonations: donations.length,
-                totalDonated: totalDonated,
-                activeSponshorships: sponsorships.filter(s => s.status === 'active').length
-            },
-            recentDonations: donations.slice(-5),
-            sponsorships: sponsorships
+            stats,
+            donations: formatPaginatedResponse(donationsResult, page, limit),
+            sponsorships: formatPaginatedResponse(sponsorshipsResult, page, limit)
         });
     } catch (error) {
         handleError(res, error);
