@@ -1,4 +1,4 @@
-const { Volunteer, VolunteerService } = require('../models');
+const { Volunteer,OrphanageHelpRequest } = require('../models');
 const { Op } = require('sequelize');
 const { formatPaginatedResponse, getPaginationParams } = require('../utils/pagination');
 const { HTTP_STATUS, handleError } = require('../utils/responses');
@@ -225,5 +225,35 @@ exports.cancelApplication = async (req, res) => {
         return res.json({ message: 'Application cancelled successfully' });
     } catch {
         return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+    }
+};
+
+
+exports.matchVolunteerToOpportunities = async (req, res) => {
+    try {
+        const volunteerId = req.params.id;
+        const volunteer = await Volunteer.findByPk(volunteerId);
+
+        if (!volunteer) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        }
+
+        const matches = await OrphanageHelpRequest.findAll({
+            where: {
+                preferredLocation: volunteer.preferredLocation,
+                requiredSkills: {
+                    [Op.overlap]: volunteer.skills
+                },
+                availability: volunteer.availability
+            }
+        });
+
+        res.status(HTTP_STATUS.OK).json({
+            message: 'Matched opportunities fetched successfully',
+            matches
+        });
+
+    } catch (error) {
+        handleError(res, error);
     }
 };

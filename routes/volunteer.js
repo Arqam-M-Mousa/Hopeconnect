@@ -15,6 +15,8 @@ router.put('/:id/verify', authenticate, authorize('admin'), service.verifyVolunt
 router.post('/:id/apply', authenticate, service.applyToHelpRequest);
 router.get('/:id/applications', authenticate, service.getVolunteerApplications);
 router.delete('/:id/applications/:applicationId', authenticate, service.cancelApplication);
+router.get('/:id/matches', authenticate, service.matchVolunteerToOpportunities);
+
 
 router.get('/', authenticate, authorize('admin'), service.getVolunteers);
 
