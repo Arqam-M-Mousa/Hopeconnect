@@ -1,4 +1,4 @@
-const {User} = require('../models/index.js');
+const {User, Sponsorship , Donation , Orphan} = require('../models/index.js');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 const jwt = require('jsonwebtoken');
@@ -150,7 +150,6 @@ exports.deleteUserById = async (req, res) => {
     }
 }
 
-
 exports.getUsers = async function (req, res) {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -177,6 +176,58 @@ exports.getUserById = async function (req, res) {
         }
 
         res.status(HTTP_STATUS.OK).json(user);
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+
+const calculateDashboardStats = (donations, sponsorships) => {
+    const totalDonated = donations.reduce((sum, donation) =>
+        sum + parseFloat(donation.amount), 0);
+    return {
+        totalDonations: donations.length,
+        totalDonated: totalDonated,
+        activeSponshorships: sponsorships.filter(s => s.status === 'active').length
+    };
+};
+
+exports.getDashboard = async (req, res) => {
+    try {
+        const {page, limit, offset} = getPaginationParams(req.query);
+        const user = await User.findByPk(req.user.id);
+
+        if (!user) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'User not found'});
+        }
+
+        const donationsResult = await Donation.findAndCountAll({
+            where: {donorId: req.user.id},
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']]
+        });
+
+        const sponsorshipsResult = await Sponsorship.findAndCountAll({
+            where: {sponsorId: req.user.id},
+            include: [{model: Orphan, attributes: ['id', 'name', 'age', 'gender', 'profileImage']}],
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']]
+        });
+
+        const stats = calculateDashboardStats(donations, sponsorships);
+
+        res.status(HTTP_STATUS.OK).json({
+            donorInfo: {
+                name: user.name,
+                email: user.email,
+                profileImage: user.profileImage
+            },
+            stats,
+            donations: formatPaginatedResponse(donationsResult, page, limit),
+            sponsorships: formatPaginatedResponse(sponsorshipsResult, page, limit)
+        });
     } catch (error) {
         handleError(res, error);
     }
