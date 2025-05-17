@@ -1,5 +1,4 @@
 const {User} = require('../models/index.js');
-const sequelize = require('../config/database');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 const jwt = require('jsonwebtoken');
@@ -8,8 +7,7 @@ dotenv.config();
 
 const generateToken = (user) => {
     const JWT_SECRET = process.env.JWT_SECRET;
-    const token = jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '30d'});
-    return token;
+    return jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '30d'});
 };
 
 exports.register = async (req, res) => {
@@ -160,9 +158,6 @@ exports.getUsers = async function (req, res) {
             limit, offset, order: [["createdAt", "DESC"]]
         });
 
-        res.status(HTTP_STATUS.OK).json({
-            result, totalPages: Math.ceil(result.count / limit), currentPage: page, totalOrphans: result.count
-        });
         if (!result.rows.length) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Orphan not found"});
         }

@@ -32,8 +32,9 @@ const users = sequelize.define('users', {
             if (user.changed('password')) {
                 user.password = await bcrypt.hash(user.password, 10);
             }
-        }, timestamps: true
-    }
+        },
+    },
+    timestamps: true
 });
 
 users.prototype.validatePassword = async function (password) {

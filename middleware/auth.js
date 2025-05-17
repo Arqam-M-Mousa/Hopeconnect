@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models');
+const {User} = require('../models');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -68,7 +68,7 @@ const authorize = (roles) => {
             next();
         } else {
             res.status(403).json({
-                status: 'error', message: `Access denied: Required role(s): ${roles.join(', ')}`
+                status: 'error', message: `Access denied: Required role(s): ${roles}`
             });
         }
     };
