@@ -12,28 +12,37 @@ const Volunteer = sequelize.define('volunteers', {
         allowNull: false,
         unique: true,
         references: {
-            model: 'users', // assumes users table already exists
+            model: 'users',
             key: 'id'
         },
         onDelete: 'CASCADE'
     },
     servicesOffered: {
-        type: DataTypes.ARRAY(DataTypes.ENUM('teaching', 'mentoring', 'healthcare', 'counseling', 'sports', 'arts', 'other')),
-        allowNull: false
+        type: DataTypes.TEXT,
+        allowNull: false,
+        get() {
+            const rawValue = this.getDataValue('servicesOffered');
+            return rawValue ? JSON.parse(rawValue) : [];
+        },
+        set(value) {
+            this.setDataValue('servicesOffered', JSON.stringify(value));
+        }
     },
     availability: {
-        type: DataTypes.STRING, // e.g., "Weekends", "Evenings", or a structured format
+        type: DataTypes.STRING,
         allowNull: true
     },
     preferredLocation: {
-        type: DataTypes.STRING, // could be city, region, or orphanage name
+        type: DataTypes.STRING,
         allowNull: true
     },
     skills: {
-        type: DataTypes.TEXT // optional detailed description of skills
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     experience: {
-        type: DataTypes.TEXT // optional background
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     verified: {
         type: DataTypes.BOOLEAN,
@@ -42,3 +51,5 @@ const Volunteer = sequelize.define('volunteers', {
 }, {
     timestamps: true
 });
+
+module.exports = Volunteer;
