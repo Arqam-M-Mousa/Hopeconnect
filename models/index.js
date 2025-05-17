@@ -17,8 +17,6 @@ Sponsorship.belongsTo(User, {foreignKey: "sponsorId"});
 Orphan.hasMany(Sponsorship, {foreignKey: "orphanId", onDelete: 'CASCADE'});
 Sponsorship.belongsTo(Orphan, {foreignKey: "orphanId"});
 
-User.hasOne(Volunteer, { foreignKey: 'userId', as: 'volunteerProfile' });
-Volunteer.belongsTo(User, { foreignKey: 'userId' });
 
 
 
