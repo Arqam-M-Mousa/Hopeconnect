@@ -7,10 +7,6 @@ const {authenticate, authorize} = require('../middleware/auth');
 router.post('/register', service.register);
 router.post('/login', service.login);
 router.get('/dashboard' , authenticate , authorize("donor") ,  service.getDashboard);
-router.get('/reviews' , authenticate, service.getReviews);
-router.post('/reviews' , authenticate , authorize("donor") , service.postReview);
-router.put('/reviews' , authenticate , authorize("donor") , service.updateReview);
-router.delete('/reviews' , authenticate ,authorize("donor" , "admin"), service.deleteReview);
 
 router.get('/me', authenticate, service.getCurrentUserProfile);
 router.put('/me', authenticate, service.updateCurrentUserProfile);
@@ -18,8 +14,6 @@ router.delete('me', authenticate, service.deleteCurrentUserProfile);
 
 router.delete('/:id', authenticate, authorize("admin"), service.deleteUserById);
 router.get('/:id', authenticate, authorize("admin"), service.getUserById);
-
-router.get('/reviews/:id', authenticate , service.getReviewById);
 
 router.get('/', authenticate, authorize("admin"), service.getUsers);
 
