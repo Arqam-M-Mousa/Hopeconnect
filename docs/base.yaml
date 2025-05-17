@@ -21,6 +21,8 @@ paths:
     $ref: './paths/orphanage.yaml'
   /donation:
     $ref: './paths/donation.yaml'
+  /review:
+    $ref: './paths/review.yaml'
 
 components:
   securitySchemes:
@@ -335,6 +337,35 @@ components:
         createdBy:
           type: integer
           example: 5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 5
+        orphanageId:
+          type: integer
+          example: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        comment:
+          type: string
+          example: "This orphanage provides excellent care and support for children."
         createdAt:
           type: string
           format: date-time
