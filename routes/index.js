@@ -7,7 +7,7 @@ const userRoutes = require('./user');
 const SponsorshipRoute = require('./sponsorship');
 const donationRoutes = require('./donation');
 
-router.use('/orphanages', orphanageRoutes);
+router.use('/orphanage', orphanageRoutes);
 router.use('/orphan', orphanRoutes);
 router.use('/user', userRoutes);
 router.use('/sponsorship', SponsorshipRoute);
