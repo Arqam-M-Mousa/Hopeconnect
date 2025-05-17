@@ -1,72 +1,11 @@
 const { Volunteer, VolunteerService } = require('../models');
-const { Op, where} = require('sequelize');
-const sequelize = require('../config/database');
+const { Op } = require('sequelize');
 const { formatPaginatedResponse, getPaginationParams } = require('../utils/pagination');
 const { HTTP_STATUS, handleError } = require('../utils/responses');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const generateToken = (volunteer) => {
-    const JWT_SECRET = process.env.JWT_SECRET;
-    const token = jwt.sign({ id: volunteer.id }, JWT_SECRET, { expiresIn: '30d' });
-    return token;
-};
-
-// Register
-exports.register = async (req, res) => {
-    try {
-        const email = req.body.email;
-        const existingVolunteer = await Volunteer.findOne({where: {email}});
-        if (existingVolunteer) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({message: "Volunteer already exists"});
-        }
-        const volunteer = req.body;
-        const token = generateToken(volunteer);
-        if (!token) {
-            return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-                message: 'Invalid token'
-            });
-        }
-        const createdVolunteer = await Volunteer.create(req.body);
-        res.status(HTTP_STATUS.CREATED).json({
-            message: "Volunteer registered successfully",
-            user: createdVolunteer,
-            token
-        });
-    } catch (error) {
-        handleError(res, error);
-    }
-};
-
-// Login
-exports.login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const volunteer = await Volunteer.findOne({where:email});
-        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
-
-        const isPasswordValid = await volunteer.validatePassword(password);
-        if (!isValid) return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Invalid credentials' });
-
-        const token = generateToken(volunteer);
-
-        res.status(HTTP_STATUS.OK).json({
-            message: 'Login successful',
-            volunteer: {
-                id: volunteer.id,
-                name: volunteer.name,
-                email: volunteer.email,
-                role: volunteer.role
-            },
-            token
-        });
-    } catch (error) {
-        handleError(res, error);
-    }
-};
-
-// Profile
 exports.getCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id, {
@@ -75,19 +14,8 @@ exports.getCurrentVolunteerProfile = async (req, res) => {
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
 
         res.status(HTTP_STATUS.OK).json({
-            message: 'Profile updated successfully',
-            volunteer: {
-                id: volunteer.id,
-                userId: volunteer.userId,
-                servicesOffered: volunteer.servicesOffered,
-                availability: volunteer.availability,
-                preferredLocation: volunteer.preferredLocation,
-                skills: volunteer.skills,
-                experience: volunteer.experience,
-                verified: volunteer.verified,
-                createdAt: volunteer.createdAt,
-                updatedAt: volunteer.updatedAt
-            }
+            message: 'Profile fetched successfully',
+            volunteer
         });
 
     } catch (error) {
@@ -100,27 +28,25 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
         const volunteer = await Volunteer.findByPk(req.user.id);
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
 
-        const { name, phone, address } = req.body;
-        if (name) volunteer.name = name;
-        if (phone) volunteer.phone = phone;
-        if (address) volunteer.address = address;
+        const updatableFields = [
+            'servicesOffered',
+            'availability',
+            'preferredLocation',
+            'skills',
+            'experience'
+        ];
+
+        updatableFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                volunteer[field] = req.body[field];
+            }
+        });
 
         await volunteer.save();
 
         res.status(HTTP_STATUS.OK).json({
             message: 'Profile updated successfully',
-            volunteer: {
-                id: volunteer.id,
-                userId: volunteer.userId,
-                servicesOffered: volunteer.servicesOffered,
-                availability: volunteer.availability,
-                preferredLocation: volunteer.preferredLocation,
-                skills: volunteer.skills,
-                experience: volunteer.experience,
-                verified: volunteer.verified,
-                createdAt: volunteer.createdAt,
-                updatedAt: volunteer.updatedAt
-            }
+            volunteer
         });
     } catch (error) {
         handleError(res, error);
@@ -139,7 +65,6 @@ exports.deleteCurrentVolunteerProfile = async (req, res) => {
     }
 };
 
-// Admin functions
 exports.getVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
@@ -153,7 +78,7 @@ exports.getVolunteerById = async (req, res) => {
 exports.deleteVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
-        if (!volunteer) return res.status(404).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
 
         await volunteer.destroy();
         res.json({ message: 'Volunteer deleted' });
@@ -165,7 +90,7 @@ exports.deleteVolunteerById = async (req, res) => {
 exports.verifyVolunteer = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
-        if (!volunteer) return res.status(404).json({ message: 'Volunteer not found' });
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
 
         volunteer.verified = true;
         await volunteer.save();
@@ -184,68 +109,19 @@ exports.getVolunteers = async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
-        res.status(200).json(formatPaginatedResponse(result, page, limit));
+        res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
     } catch (error) {
         handleError(res, error);
     }
 };
 
-// Services (skills) management
-exports.getServices = async (req, res) => {
-    try {
-        const services = await VolunteerService.findAll({ where: { volunteerId: req.user.id } });
-        res.json(services);
-    } catch (error) {
-        handleError(res, error);
-    }
-};
 
-exports.addService = async (req, res) => {
-    try {
-        const service = await VolunteerService.create({
-            volunteerId: req.user.id,
-            ...req.body
-        });
-        res.status(201).json(service);
-    } catch (error) {
-        handleError(res, error);
-    }
-};
 
-exports.updateService = async (req, res) => {
-    try {
-        const service = await VolunteerService.findOne({
-            where: { id: req.params.serviceId, volunteerId: req.user.id }
-        });
-        if (!service) return res.status(404).json({ message: 'Service not found' });
-
-        await service.update(req.body);
-        res.json(service);
-    } catch (error) {
-        handleError(res, error);
-    }
-};
-
-exports.deleteService = async (req, res) => {
-    try {
-        const service = await VolunteerService.findOne({
-            where: { id: req.params.serviceId, volunteerId: req.user.id }
-        });
-        if (!service) return res.status(404).json({ message: 'Service not found' });
-
-        await service.destroy();
-        res.json({ message: 'Service deleted' });
-    } catch (error) {
-        handleError(res, error);
-    }
-};
-
-// Search + Available volunteers (admin)
 exports.searchVolunteers = async (req, res) => {
     try {
         const { skill, availability } = req.query;
 
-        const result = await Volunteer.findAll({
+        const volunteers = await Volunteer.findAll({
             where: {
                 ...(availability && { availability }),
             },
@@ -258,17 +134,96 @@ exports.searchVolunteers = async (req, res) => {
             ]
         });
 
-        res.json(result);
+        res.json(volunteers);
     } catch (error) {
         handleError(res, error);
     }
 };
-
-exports.getAvailableVolunteers = async (req, res) => {
+exports.updateVolunteerById = async (req, res) => {
     try {
-        const result = await Volunteer.findAll({ where: { availability: true } });
-        res.json(result);
+        const volunteerId = req.params.id;
+        const volunteer = await Volunteer.findByPk(volunteerId);
+        if (!volunteer) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Volunteer not found' });
+        }
+
+        const allowedFields = [
+            'servicesOffered',
+            'availability',
+            'preferredLocation',
+            'skills',
+            'experience'
+        ];
+
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                volunteer[field] = req.body[field];
+            }
+        });
+
+        await volunteer.save();
+
+        res.status(200).json({
+            message: 'Volunteer updated successfully',
+            volunteer
+        });
     } catch (error) {
-        handleError(res, error);
+       handleError(res, error);
+    }
+};
+
+exports.applyToHelpRequest = async (req, res) => {
+    try {
+        const volunteerId = req.user.id;
+        const helpRequestId = req.params.id;
+
+        const helpRequest = await OrphanageHelpRequest.findByPk(helpRequestId);
+        if (!helpRequest) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Help request not found' });
+
+        const existingApplication = await VolunteerHelpRequest.findOne({ where: { volunteerId, helpRequestId } });
+        if (existingApplication) return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'You already applied to this help request' });
+
+        await VolunteerHelpRequest.create({ volunteerId, helpRequestId });
+
+        return res.status(HTTP_STATUS.CREATED).json({ message: 'Application submitted successfully' });
+    } catch {
+        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+    }
+};
+
+exports.getVolunteerApplications = async (req, res) => {
+    try {
+        const volunteerId = req.user.id;
+
+        const applications = await OrphanageHelpRequest.findAll({
+            include: [{
+                model: Volunteer,
+                where: { id: volunteerId },
+                attributes: []
+            }]
+        });
+
+        return res.json(applications);
+    } catch {
+        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
+    }
+};
+
+exports.cancelApplication = async (req, res) => {
+    try {
+        const volunteerId = req.user.id;
+        const applicationId = req.params.applicationId;
+
+        const application = await VolunteerHelpRequest.findOne({
+            where: { volunteerId, helpRequestId: applicationId }
+        });
+
+        if (!application) return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Application not found' });
+
+        await application.destroy();
+
+        return res.json({ message: 'Application cancelled successfully' });
+    } catch {
+        return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: 'Server error' });
     }
 };
