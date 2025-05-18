@@ -1,0 +1,489 @@
+/:
+  get:
+    summary: Get all partners
+    tags: [Partnership]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of partners per page
+    responses:
+      200:
+        description: List of partners retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Partnership'
+      404:
+        description: Partners not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partners not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  post:
+    summary: Create a new partner
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name, description, website, logo]
+            properties:
+              name:
+                type: string
+                example: "Global Education Fund"
+              description:
+                type: string
+                example: "A non-profit organization focused on providing educational resources to children in need."
+              website:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org"
+              logo:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org/logo.png"
+              contactEmail:
+                type: string
+                format: email
+                example: "contact@globaleducationfund.org"
+              contactPhone:
+                type: string
+                example: "+1234567890"
+    responses:
+      201:
+        description: Partner created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner created successfully
+                partner:
+                  $ref: '#/components/schemas/Partnership'
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid input data
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}:
+  get:
+    summary: Get a partner by ID
+    tags: [Partnership]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner to retrieve
+    responses:
+      200:
+        description: Partner retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Partnership'
+      404:
+        description: Partner not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update a partner
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Global Education Fund International"
+              description:
+                type: string
+                example: "Updated description for the organization."
+              website:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org"
+              logo:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org/new-logo.png"
+              contactEmail:
+                type: string
+                format: email
+                example: "info@globaleducationfund.org"
+              contactPhone:
+                type: string
+                example: "+1987654321"
+    responses:
+      200:
+        description: Partner updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner updated successfully
+                partner:
+                  $ref: '#/components/schemas/Partnership'
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid input data
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete a partner
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner to delete
+    responses:
+      200:
+        description: Partner deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner deleted successfully
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{partnershipId}/orphanages:
+  get:
+    summary: Get orphanages for a partner
+    tags: [Partnership]
+    parameters:
+      - in: path
+        name: partnershipId
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of orphanages per page
+    responses:
+      200:
+        description: List of orphanages retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Orphanage'
+      404:
+        description: Partner not found or no orphanages found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner not found or no orphanages found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{partnershipId}/orphanages/{orphanageId}:
+  post:
+    summary: Link a partner to an orphanage
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: partnershipId
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner
+      - in: path
+        name: orphanageId
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+    responses:
+      201:
+        description: Partner linked to orphanage successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner linked to orphanage successfully
+      400:
+        description: Invalid input or already linked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner is already linked to this orphanage
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner or orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner or orphanage not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Unlink a partner from an orphanage
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: partnershipId
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner
+      - in: path
+        name: orphanageId
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+    responses:
+      200:
+        description: Partner unlinked from orphanage successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner unlinked from orphanage successfully
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner or orphanage not found or not linked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner or orphanage not found or not linked
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error

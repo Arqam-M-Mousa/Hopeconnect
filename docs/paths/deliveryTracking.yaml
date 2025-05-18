@@ -1,0 +1,349 @@
+/:
+  get:
+    summary: Get all deliveries
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of deliveries per page
+    responses:
+      200:
+        description: List of deliveries retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DeliveryTracking'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  post:
+    summary: Create a new delivery
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [donationId, status, estimatedDeliveryDate]
+            properties:
+              donationId:
+                type: integer
+                example: 1
+              status:
+                type: string
+                enum: [pending, in_transit, delivered]
+                example: pending
+              estimatedDeliveryDate:
+                type: string
+                format: date-time
+                example: "2023-06-01T00:00:00Z"
+              currentLocation:
+                type: string
+                example: "Warehouse A"
+              notes:
+                type: string
+                example: "Package contains educational materials"
+    responses:
+      201:
+        description: Delivery created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery created successfully
+                delivery:
+                  $ref: '#/components/schemas/DeliveryTracking'
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid input data
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}:
+  get:
+    summary: Get a delivery by ID
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the delivery to retrieve
+    responses:
+      200:
+        description: Delivery retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryTracking'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin or donor only
+      404:
+        description: Delivery not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  put:
+    summary: Update a delivery
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the delivery to update
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [pending, in_transit, delivered]
+                example: in_transit
+              estimatedDeliveryDate:
+                type: string
+                format: date-time
+                example: "2023-06-15T00:00:00Z"
+              currentLocation:
+                type: string
+                example: "Distribution Center B"
+              notes:
+                type: string
+                example: "Package in transit to final destination"
+    responses:
+      200:
+        description: Delivery updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery updated successfully
+                delivery:
+                  $ref: '#/components/schemas/DeliveryTracking'
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid input data
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Delivery not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Delete a delivery
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the delivery to delete
+    responses:
+      200:
+        description: Delivery deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery deleted successfully
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Delivery not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/{id}/location:
+  get:
+    summary: Get current location of a delivery
+    tags: [DeliveryTracking]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the delivery to get location for
+    responses:
+      200:
+        description: Delivery location retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentLocation:
+                  type: string
+                  example: "Distribution Center B"
+                lastUpdated:
+                  type: string
+                  format: date-time
+                  example: "2023-05-20T14:30:00Z"
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin or donor only
+      404:
+        description: Delivery not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Delivery not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error

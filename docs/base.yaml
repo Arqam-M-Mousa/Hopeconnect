@@ -23,6 +23,10 @@ paths:
     $ref: './paths/donation.yaml'
   /review:
     $ref: './paths/review.yaml'
+  /deliveryTracking:
+    $ref: './paths/deliveryTracking.yaml'
+  /partnership:
+    $ref: './paths/partnership.yaml'
 
 components:
   securitySchemes:
@@ -366,6 +370,74 @@ components:
         comment:
           type: string
           example: "This orphanage provides excellent care and support for children."
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    DeliveryTracking:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        donationId:
+          type: integer
+          example: 1
+        status:
+          type: string
+          enum: [pending, in_transit, delivered]
+          example: in_transit
+        estimatedDeliveryDate:
+          type: string
+          format: date-time
+          example: "2023-06-01T00:00:00Z"
+        currentLocation:
+          type: string
+          example: "Distribution Center B"
+        notes:
+          type: string
+          example: "Package in transit to final destination"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Partnership:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Global Education Fund"
+        description:
+          type: string
+          example: "A non-profit organization focused on providing educational resources to children in need."
+        website:
+          type: string
+          format: uri
+          example: "https://www.globaleducationfund.org"
+        logo:
+          type: string
+          format: uri
+          example: "https://www.globaleducationfund.org/logo.png"
+        contactEmail:
+          type: string
+          format: email
+          example: "contact@globaleducationfund.org"
+        contactPhone:
+          type: string
+          example: "+1234567890"
         createdAt:
           type: string
           format: date-time
