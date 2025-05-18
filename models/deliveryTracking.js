@@ -1,34 +1,30 @@
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const deliveryLocation = sequelize.define('deliveryLocation', {
+const deliveryTracking = sequelize.define('deliveryTracking', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    deliveryId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'deliveryTracking',
-            key: 'id'
+        type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
+    }, donationId: {
+        type: DataTypes.INTEGER, allowNull: false, references: {
+            model: 'donations', key: 'id'
         }
-    },
-    latitude: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
-    longitude: {
-        type: DataTypes.FLOAT,
-        allowNull: false
-    },
-    timestamp: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+    }, status: {
+        type: DataTypes.ENUM,
+        values: ['PENDING', 'ASSIGNED', 'PICKUP_IN_PROGRESS', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'],
+        defaultValue: 'PENDING'
+    }, pickupAddress: {
+        type: DataTypes.STRING, allowNull: false
+    }, deliveryAddress: {
+        type: DataTypes.STRING, allowNull: false
+    }, pickupDate: {
+        type: DataTypes.DATE, allowNull: false
+    }, deliveryDate: {
+        type: DataTypes.DATE, allowNull: true
+    }, currentLocation: {
+        type: DataTypes.STRING, allowNull: true
     }
 }, {
-    timestamps: false
+    timestamps: true
 });
 
-module.exports = deliveryLocation;
+module.exports = deliveryTracking;
