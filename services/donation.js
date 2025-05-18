@@ -35,7 +35,7 @@ exports.getDonations = async (req, res) => {
 exports.donate = async (req, res) => {
     try {
         const amount = parseFloat(req.body.amount);
-        const feeRate = parseFloat(req.body.transactionFeeRate) || 0;
+        const feeRate = parseFloat(req.body.transactionFee) || 0;
 
         if (isNaN(amount) || amount <= 0) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid amount" });
@@ -43,7 +43,6 @@ exports.donate = async (req, res) => {
         if (isNaN(feeRate) || feeRate < 0 || feeRate > 1) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid transaction fee rate" });
         }
-
         const transactionFee = parseFloat((amount * feeRate).toFixed(2));
         const netAmount = parseFloat((amount - transactionFee).toFixed(2));
 
