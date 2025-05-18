@@ -54,8 +54,6 @@ OrphanageHelpRequest.belongsToMany(Volunteer, {
 Donation.hasMany(DeliveryTracking, { foreignKey: 'donationId', onDelete: 'CASCADE' });
 DeliveryTracking.belongsTo(Donation, { foreignKey: 'donationId' });
 
-User.hasMany(DeliveryTracking, { foreignKey: 'assignedDriverId', onDelete: 'SET NULL' });
-DeliveryTracking.belongsTo(User, { foreignKey: 'assignedDriverId' });
 
 
 
