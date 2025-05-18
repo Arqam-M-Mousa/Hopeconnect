@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const orphanagePartnerships = sequelize.define('orphanage_partners', {
+const orphanagePartnerships = sequelize.define('orphanage_partnerships', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}, orphanageId: {
         type: DataTypes.INTEGER, allowNull: false, references: {
             model: 'orphanages', key: 'id'

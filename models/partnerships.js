@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const partnerships = sequelize.define('partners', {
+const partnerships = sequelize.define('partnerships', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     name: {type: DataTypes.STRING, allowNull: false},
     type: {type: DataTypes.ENUM('NGO', 'charity', 'humanitarian'), allowNull: false},
