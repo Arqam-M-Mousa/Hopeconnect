@@ -9,7 +9,6 @@ const partner = sequelize.define('partners', {
     phone: { type: DataTypes.STRING, allowNull: true },
     address: { type: DataTypes.STRING, allowNull: true },
     description: { type: DataTypes.TEXT, allowNull: true },
-    status: { type: DataTypes.ENUM('active', 'pending', 'inactive'), defaultValue: 'pending' }
 }, { timestamps: true });
 
 module.exports = partner;
