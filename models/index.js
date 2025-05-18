@@ -9,8 +9,8 @@ const Donation = require("./donations");
 const DonationsTracking = require("./donationsTracking");
 const Review = require("./reviews");
 const DeliveryTracking = require("./deliveryTracking");
-const Partner = require('./partnership');
-const OrphanagePartner = require('./orphanage-partnership');
+const Partner = require('./partnerships');
+const OrphanagePartner = require('./orphanage-partnerships');
 
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
