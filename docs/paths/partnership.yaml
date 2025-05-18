@@ -68,11 +68,15 @@
         application/json:
           schema:
             type: object
-            required: [name, description, website, logo]
+            required: [name, type, contactEmail]
             properties:
               name:
                 type: string
                 example: "Global Education Fund"
+              type:
+                type: string
+                enum: [NGO, charity, humanitarian]
+                example: "NGO"
               description:
                 type: string
                 example: "A non-profit organization focused on providing educational resources to children in need."
@@ -91,6 +95,9 @@
               contactPhone:
                 type: string
                 example: "+1234567890"
+              address:
+                type: string
+                example: "123 Main St, City, Country"
     responses:
       201:
         description: Partner created successfully
@@ -190,6 +197,10 @@
               name:
                 type: string
                 example: "Global Education Fund International"
+              type:
+                type: string
+                enum: [NGO, charity, humanitarian]
+                example: "charity"
               description:
                 type: string
                 example: "Updated description for the organization."
@@ -208,6 +219,9 @@
               contactPhone:
                 type: string
                 example: "+1987654321"
+              address:
+                type: string
+                example: "456 New St, City, Country"
     responses:
       200:
         description: Partner updated successfully

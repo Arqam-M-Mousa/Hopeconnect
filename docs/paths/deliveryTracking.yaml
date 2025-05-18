@@ -64,25 +64,32 @@
         application/json:
           schema:
             type: object
-            required: [donationId, status, estimatedDeliveryDate]
+            required: [donationId, status, pickupAddress, deliveryAddress, pickupDate]
             properties:
               donationId:
                 type: integer
                 example: 1
               status:
                 type: string
-                enum: [pending, in_transit, delivered]
-                example: pending
-              estimatedDeliveryDate:
+                enum: [PENDING, ASSIGNED, PICKUP_IN_PROGRESS, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED]
+                example: PENDING
+              pickupAddress:
+                type: string
+                example: "123 Sender St, City, Country"
+              deliveryAddress:
+                type: string
+                example: "456 Recipient St, City, Country"
+              pickupDate:
                 type: string
                 format: date-time
-                example: "2023-06-01T00:00:00Z"
+                example: "2023-05-25T10:00:00Z"
+              deliveryDate:
+                type: string
+                format: date-time
+                example: "2023-06-01T14:00:00Z"
               currentLocation:
                 type: string
                 example: "Warehouse A"
-              notes:
-                type: string
-                example: "Package contains educational materials"
     responses:
       201:
         description: Delivery created successfully
@@ -187,18 +194,25 @@
             properties:
               status:
                 type: string
-                enum: [pending, in_transit, delivered]
-                example: in_transit
-              estimatedDeliveryDate:
+                enum: [PENDING, ASSIGNED, PICKUP_IN_PROGRESS, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED]
+                example: IN_TRANSIT
+              pickupAddress:
+                type: string
+                example: "123 Sender St, City, Country"
+              deliveryAddress:
+                type: string
+                example: "456 Recipient St, City, Country"
+              pickupDate:
                 type: string
                 format: date-time
-                example: "2023-06-15T00:00:00Z"
+                example: "2023-05-25T10:00:00Z"
+              deliveryDate:
+                type: string
+                format: date-time
+                example: "2023-06-01T14:00:00Z"
               currentLocation:
                 type: string
                 example: "Distribution Center B"
-              notes:
-                type: string
-                example: "Package in transit to final destination"
     responses:
       200:
         description: Delivery updated successfully

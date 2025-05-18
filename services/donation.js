@@ -1,4 +1,4 @@
-const {Donation, DonationsTrackingCampaign, User,} = require('../models/index.js');
+const {Donation, DonationsTracking, User, Campaign} = require('../models/index.js');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 const nodemailer = require('nodemailer')
@@ -74,7 +74,7 @@ exports.donate = async (req, res) => {
             }
         }
 
-        await DonationTracking.create({
+        await DonationsTracking.create({
             donationId: newDonation.id,
             status: newDonation.status,
             title: 'Donation Created',
@@ -108,7 +108,7 @@ exports.updateDonation = async (req, res) => {
 
         await donation.update(req.body);
 
-        await DonationTracking.create({
+        await DonationsTracking.create({
             donationId: donation.id,
             status: req.body.status,
             title: req.body.title || 'Status Updated',
@@ -160,11 +160,13 @@ exports.getAllUpdates = async (req, res) => {
 exports.getUserDonationsUpdates = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
+        const donationId = req.params.id;
+
         const result = await DonationsTracking.findAndCountAll({
-            where: {userId: req.user.id}, limit, offset, order: [["createdAt", "DESC"]]
+            where: {donationId}, limit, offset, order: [["createdAt", "DESC"]]
         });
         if (!result.rows.length) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Updates for user not found"});
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Updates for donation not found"});
         }
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
     } catch (error) {
@@ -174,16 +176,18 @@ exports.getUserDonationsUpdates = async (req, res) => {
 
 exports.getUserUpdateById = async (req, res) => {
     try {
-        const updateId = req.params.id;
-        const donation = await DonationsTracking.findOne({
-            where: {userId: req.user.id}, updateId
+        const donationId = req.params.id;
+        const updateId = req.params.updateId;
+
+        const update = await DonationsTracking.findOne({
+            where: { donationId, id: updateId }
         });
 
-        if (!donation) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Donation not found"});
+        if (!update) {
+            return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Update not found"});
         }
 
-        res.status(HTTP_STATUS.OK).json(donation);
+        res.status(HTTP_STATUS.OK).json(update);
     } catch (error) {
         handleError(res, error);
     }

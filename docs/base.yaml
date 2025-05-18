@@ -51,7 +51,8 @@ components:
           example: user@example.com
         role:
           type: string
-          example: user
+          enum: [admin, donor, volunteer]
+          example: donor
         phone:
           type: string
           example: "+1234567890"
@@ -301,9 +302,20 @@ components:
         transactionId:
           type: string
           example: "tx_12345678"
+        campaignId:
+          type: integer
+          example: 1
         createdBy:
           type: integer
           example: 5
+        transactionFee:
+          type: number
+          format: float
+          example: 2.50
+        netAmount:
+          type: number
+          format: float
+          example: 97.50
         createdAt:
           type: string
           format: date-time
@@ -313,7 +325,7 @@ components:
           format: date-time
           example: "2023-05-17T12:00:00Z"
 
-    DonationTracking:
+    DonationsTracking:
       type: object
       properties:
         id:
@@ -369,6 +381,8 @@ components:
           example: 4
         comment:
           type: string
+          minLength: 10
+          maxLength: 500
           example: "This orphanage provides excellent care and support for children."
         createdAt:
           type: string
@@ -390,18 +404,25 @@ components:
           example: 1
         status:
           type: string
-          enum: [pending, in_transit, delivered]
-          example: in_transit
-        estimatedDeliveryDate:
+          enum: [PENDING, ASSIGNED, PICKUP_IN_PROGRESS, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED]
+          example: IN_TRANSIT
+        pickupAddress:
+          type: string
+          example: "123 Sender St, City, Country"
+        deliveryAddress:
+          type: string
+          example: "456 Recipient St, City, Country"
+        pickupDate:
           type: string
           format: date-time
-          example: "2023-06-01T00:00:00Z"
+          example: "2023-05-25T10:00:00Z"
+        deliveryDate:
+          type: string
+          format: date-time
+          example: "2023-06-01T14:00:00Z"
         currentLocation:
           type: string
           example: "Distribution Center B"
-        notes:
-          type: string
-          example: "Package in transit to final destination"
         createdAt:
           type: string
           format: date-time
@@ -420,6 +441,10 @@ components:
         name:
           type: string
           example: "Global Education Fund"
+        type:
+          type: string
+          enum: [NGO, charity, humanitarian]
+          example: "NGO"
         description:
           type: string
           example: "A non-profit organization focused on providing educational resources to children in need."
@@ -438,6 +463,91 @@ components:
         contactPhone:
           type: string
           example: "+1234567890"
+        address:
+          type: string
+          example: "123 Main St, City, Country"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Education for All"
+        description:
+          type: string
+          example: "A campaign to provide educational resources to orphans"
+        goalAmount:
+          type: number
+          format: float
+          example: 10000.00
+        currentAmount:
+          type: number
+          format: float
+          example: 5000.00
+        isEmergency:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    OrphanagePartnership:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        orphanageId:
+          type: integer
+          example: 2
+        partnerId:
+          type: integer
+          example: 3
+        partnershipStatus:
+          type: string
+          enum: [active, pending, inactive]
+          example: active
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
+
+    VolunteerHelpRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        volunteerId:
+          type: integer
+          example: 2
+        helpRequestId:
+          type: integer
+          example: 3
+        appliedAt:
+          type: string
+          format: date-time
+          example: "2023-05-17T12:00:00Z"
         createdAt:
           type: string
           format: date-time

@@ -87,6 +87,14 @@
               sponsorshipId:
                 type: integer
                 example: 2
+              campaignId:
+                type: integer
+                example: 1
+              transactionFee:
+                type: number
+                format: float
+                example: 0.05
+                description: "Transaction fee rate (0-1). If not provided, defaults to 0."
     responses:
       201:
         description: Donation created successfully
@@ -349,7 +357,7 @@
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/DonationTracking'
+                    $ref: '#/components/schemas/DonationsTracking'
       401:
         description: Unauthorized - Authentication required
       403:
@@ -400,7 +408,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DonationTracking'
+              $ref: '#/components/schemas/DonationsTracking'
       401:
         description: Unauthorized - Authentication required
       403:
@@ -465,7 +473,7 @@
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/DonationTracking'
+                    $ref: '#/components/schemas/DonationsTracking'
       401:
         description: Unauthorized - Authentication required
       403:
@@ -500,7 +508,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DonationTracking'
+              $ref: '#/components/schemas/DonationsTracking'
       401:
         description: Unauthorized - Authentication required
       403:

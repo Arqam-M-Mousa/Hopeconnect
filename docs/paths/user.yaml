@@ -112,7 +112,8 @@
                         example: user@example.com
                       role:
                         type: string
-                        example: user
+                        enum: [admin, donor, volunteer]
+                        example: donor
                   token:
                     type: string
                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -173,7 +174,8 @@
                     example: user@example.com
                   role:
                     type: string
-                    example: user
+                    enum: [admin, donor, volunteer]
+                    example: donor
                   phone:
                     type: string
                     example: "+1234567890"
@@ -258,7 +260,8 @@
                         example: user@example.com
                       role:
                         type: string
-                        example: user
+                        enum: [admin, donor, volunteer]
+                        example: donor
                       phone:
                         type: string
                         example: "+1234567890"
