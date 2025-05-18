@@ -8,8 +8,8 @@ HopeConnect is a platform designed to bridge the gap between orphanages and thos
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Documentation](#api-documentation)
+- [Advanced Features](#advanced-features)
 - [Project Structure](#project-structure)
-- [License](#license)
 
 ## Features
 
@@ -49,16 +49,16 @@ HopeConnect is a platform designed to bridge the gap between orphanages and thos
    ```
    PORT=3000
    NODE_ENV=development
-   
+
    # Database Configuration
    DB_HOST=localhost
    DB_USER=root
    DB_PASS=your_password
    DB_NAME=hopeconnect
-   
+
    # JWT Secret
    JWT_SECRET=your_jwt_secret
-   
+
    # Email Configuration (if using nodemailer)
    EMAIL_ADDRESS=your_email@example.com
    EMAIL_PASSWORD=your_email_password
@@ -74,7 +74,7 @@ HopeConnect is a platform designed to bridge the gap between orphanages and thos
    ```
    # Development mode
    npm run dev
-   
+
    # Production mode
    npm start
    ```
@@ -102,6 +102,61 @@ The API is documented using Swagger. After starting the server, visit `http://lo
 - `/api/v1/review` - Orphanage reviews
 - `/api/v1/deliveryTracking` - Track donation deliveries
 - `/api/v1/partnership` - Partnership management
+
+## Advanced Features
+
+### Pagination
+
+The HopeConnect API supports pagination for endpoints that return multiple items:
+
+- **Query Parameters**:
+  - `page`: The page number (starts from 1)
+  - `limit`: Number of items per page (default: 10)
+
+- **Response Format**:
+  ```json
+  {
+    "data": [...],
+    "pagination": {
+      "totalItems": 100,
+      "totalPages": 10,
+      "currentPage": 1,
+      "itemsPerPage": 10
+    }
+  }
+  ```
+
+- **Example Usage**:
+  ```
+  GET /api/v1/orphanages?page=2&limit=15
+  ```
+
+### Atomic Operations for Transactions
+
+HopeConnect ensures data integrity for critical operations through atomic transactions:
+
+- **Transaction Support**: All financial operations (donations, sponsorships) are executed within database transactions to ensure atomicity.
+
+- **Implementation**:
+  ```javascript
+  // Example of transaction usage in the codebase
+  const transaction = await sequelize.transaction();
+  try {
+    // Perform multiple database operations
+    await Donation.create({ amount, userId, orphanageId }, { transaction });
+    await OrphanageBalance.increment('balance', { by: amount, where: { id: orphanageId }, transaction });
+    
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+  ```
+
+- **Benefits**:
+  - Prevents partial updates that could lead to data inconsistencies
+  - Ensures financial records remain balanced
+  - Maintains data integrity during concurrent operations
 
 ## Project Structure
 
