@@ -60,10 +60,8 @@ HopeConnect is a platform designed to bridge the gap between orphanages and thos
    JWT_SECRET=your_jwt_secret
    
    # Email Configuration (if using nodemailer)
-   EMAIL_HOST=smtp.example.com
-   EMAIL_PORT=587
-   EMAIL_USER=your_email@example.com
-   EMAIL_PASS=your_email_password
+   EMAIL_ADDRESS=your_email@example.com
+   EMAIL_PASSWORD=your_email_password
    ```
 
 4. Set up the database:
