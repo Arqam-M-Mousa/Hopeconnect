@@ -1,8 +1,25 @@
-const {Donation, DonationsTracking} = require('../models/index.js');
+const {Donation, DonationsTrackingCampaign, User,} = require('../models/index.js');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
+const nodemailer = require('nodemailer')
+require('dotenv').config();
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail', auth: {
+        user: process.env.EMAIL_ADDRESS, pass: process.env.EMAIL_PASSWORD
+    }
+});
 
+const sendEmergencyEmail = async (email, amount, campaignTitle) => {
+    const mailOptions = {
+        from: process.env.EMAIL_ADDRESS,
+        to: email,
+        subject: `Emergency Donation Received - ${campaignTitle}`,
+        text: `Thank you for your donation of $${amount} towards "${campaignTitle}". Your help is urgently needed and appreciated!`
+    };
+
+    await transporter.sendMail(mailOptions);
+};
 exports.getDonationByID = async (req, res) => {
     try {
         const donation = await Donation.findByPk(req.params.id);
@@ -49,6 +66,13 @@ exports.donate = async (req, res) => {
         const newDonation = await Donation.create({
             ...req.body, transactionFee, netAmount
         });
+        let campaign = null;
+        if (req.body.campaignId) {
+            campaign = await Campaign.findByPk(req.body.campaignId);
+            if (!campaign) {
+                return res.status(HTTP_STATUS.BAD_REQUEST).json({message: "Invalid campaign ID"});
+            }
+        }
 
         await DonationTracking.create({
             donationId: newDonation.id,
@@ -60,6 +84,12 @@ exports.donate = async (req, res) => {
             createdBy: req.body.createdBy || req.user.id
         });
 
+        if (campaign?.isEmergency) {
+            const donor = await User.findByPk(req.body.donorId);
+            if (donor?.email) {
+                await sendEmergencyEmail(donor.email, newDonation, campaign?.title);
+            }
+        }
         res.status(HTTP_STATUS.CREATED).json({
             message: "Donation created successfully", donation: newDonation
         });
