@@ -1,9 +1,7 @@
 /:
   get:
-    summary: Get all donations
-    tags: [Donation]
-    security:
-      - bearerAuth: []
+    summary: Get all partners
+    tags: [Partnership]
     parameters:
       - in: query
         name: page
@@ -16,10 +14,10 @@
         schema:
           type: integer
           default: 10
-        description: Number of donations per page
+        description: Number of partners per page
     responses:
       200:
-        description: List of donations retrieved successfully
+        description: List of partners retrieved successfully
         content:
           application/json:
             schema:
@@ -37,11 +35,17 @@
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/Donation'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin only
+                    $ref: '#/components/schemas/Partnership'
+      404:
+        description: Partners not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partners not found
       500:
         description: Internal Server Error
         content:
@@ -54,8 +58,8 @@
                   example: Internal Server Error
 
   post:
-    summary: Create a new donation
-    tags: [Donation]
+    summary: Create a new partner
+    tags: [Partnership]
     security:
       - bearerAuth: []
     requestBody:
@@ -64,40 +68,39 @@
         application/json:
           schema:
             type: object
-            required: [amount, category, donationType, orphanageId]
+            required: [name, type, contactEmail]
             properties:
-              amount:
-                type: number
-                format: float
-                example: 100.00
-              category:
+              name:
                 type: string
-                enum: [general-funds, education, medical, emergency]
-                example: education
-              donationType:
+                example: "Global Education Fund"
+              type:
                 type: string
-                enum: [money, clothes, food, educational, other]
-                example: money
+                enum: [NGO, charity, humanitarian]
+                example: "NGO"
               description:
                 type: string
-                example: "Donation for educational supplies"
-              orphanageId:
-                type: integer
-                example: 1
-              sponsorshipId:
-                type: integer
-                example: 2
-              campaignId:
-                type: integer
-                example: 1
-              transactionFee:
-                type: number
-                format: float
-                example: 0.05
-                description: "Transaction fee rate (0-1). If not provided, defaults to 0."
+                example: "A non-profit organization focused on providing educational resources to children in need."
+              website:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org"
+              logo:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org/logo.png"
+              contactEmail:
+                type: string
+                format: email
+                example: "contact@globaleducationfund.org"
+              contactPhone:
+                type: string
+                example: "+1234567890"
+              address:
+                type: string
+                example: "123 Main St, City, Country"
     responses:
       201:
-        description: Donation created successfully
+        description: Partner created successfully
         content:
           application/json:
             schema:
@@ -105,9 +108,9 @@
               properties:
                 message:
                   type: string
-                  example: Donation created successfully
-                donation:
-                  $ref: '#/components/schemas/Donation'
+                  example: Partner created successfully
+                partner:
+                  $ref: '#/components/schemas/Partnership'
       400:
         description: Invalid input
         content:
@@ -121,7 +124,7 @@
       401:
         description: Unauthorized - Authentication required
       403:
-        description: Forbidden - Donor only
+        description: Forbidden - Admin only
       500:
         description: Internal Server Error
         content:
@@ -135,30 +138,24 @@
 
 /{id}:
   get:
-    summary: Get a donation by ID
-    tags: [Donation]
-    security:
-      - bearerAuth: []
+    summary: Get a partner by ID
+    tags: [Partnership]
     parameters:
       - in: path
         name: id
         required: true
         schema:
           type: integer
-        description: ID of the donation to retrieve
+        description: ID of the partner to retrieve
     responses:
       200:
-        description: Donation retrieved successfully
+        description: Partner retrieved successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Donation'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin only
+              $ref: '#/components/schemas/Partnership'
       404:
-        description: Donation not found
+        description: Partner not found
         content:
           application/json:
             schema:
@@ -166,7 +163,7 @@
               properties:
                 message:
                   type: string
-                  example: Donation not found
+                  example: Partner not found
       500:
         description: Internal Server Error
         content:
@@ -179,8 +176,8 @@
                   example: Internal Server Error
 
   put:
-    summary: Update a donation
-    tags: [Donation]
+    summary: Update a partner
+    tags: [Partnership]
     security:
       - bearerAuth: []
     parameters:
@@ -189,7 +186,7 @@
         required: true
         schema:
           type: integer
-        description: ID of the donation to update
+        description: ID of the partner to update
     requestBody:
       required: true
       content:
@@ -197,28 +194,37 @@
           schema:
             type: object
             properties:
-              amount:
-                type: number
-                format: float
-                example: 150.00
-              category:
+              name:
                 type: string
-                enum: [general-funds, education, medical, emergency]
-                example: medical
-              donationType:
+                example: "Global Education Fund International"
+              type:
                 type: string
-                enum: [money, clothes, food, educational, other]
-                example: money
+                enum: [NGO, charity, humanitarian]
+                example: "charity"
               description:
                 type: string
-                example: "Updated donation for medical supplies"
-              status:
+                example: "Updated description for the organization."
+              website:
                 type: string
-                enum: [pending, completed, failed]
-                example: completed
+                format: uri
+                example: "https://www.globaleducationfund.org"
+              logo:
+                type: string
+                format: uri
+                example: "https://www.globaleducationfund.org/new-logo.png"
+              contactEmail:
+                type: string
+                format: email
+                example: "info@globaleducationfund.org"
+              contactPhone:
+                type: string
+                example: "+1987654321"
+              address:
+                type: string
+                example: "456 New St, City, Country"
     responses:
       200:
-        description: Donation updated successfully
+        description: Partner updated successfully
         content:
           application/json:
             schema:
@@ -226,9 +232,9 @@
               properties:
                 message:
                   type: string
-                  example: Donation updated successfully
-                donation:
-                  $ref: '#/components/schemas/Donation'
+                  example: Partner updated successfully
+                partner:
+                  $ref: '#/components/schemas/Partnership'
       400:
         description: Invalid input
         content:
@@ -244,7 +250,7 @@
       403:
         description: Forbidden - Admin only
       404:
-        description: Donation not found
+        description: Partner not found
         content:
           application/json:
             schema:
@@ -252,7 +258,7 @@
               properties:
                 message:
                   type: string
-                  example: Donation not found
+                  example: Partner not found
       500:
         description: Internal Server Error
         content:
@@ -265,8 +271,8 @@
                   example: Internal Server Error
 
   delete:
-    summary: Delete a donation
-    tags: [Donation]
+    summary: Delete a partner
+    tags: [Partnership]
     security:
       - bearerAuth: []
     parameters:
@@ -275,10 +281,10 @@
         required: true
         schema:
           type: integer
-        description: ID of the donation to delete
+        description: ID of the partner to delete
     responses:
       200:
-        description: Donation deleted successfully
+        description: Partner deleted successfully
         content:
           application/json:
             schema:
@@ -286,13 +292,13 @@
               properties:
                 message:
                   type: string
-                  example: Donation deleted successfully
+                  example: Partner deleted successfully
       401:
         description: Unauthorized - Authentication required
       403:
         description: Forbidden - Admin only
       404:
-        description: Donation not found
+        description: Partner not found
         content:
           application/json:
             schema:
@@ -300,7 +306,7 @@
               properties:
                 message:
                   type: string
-                  example: Donation not found
+                  example: Partner not found
       500:
         description: Internal Server Error
         content:
@@ -312,19 +318,17 @@
                   type: string
                   example: Internal Server Error
 
-/{id}/updates:
+/{partnershipId}/orphanages:
   get:
-    summary: Get updates for a specific donation
-    tags: [Donation]
-    security:
-      - bearerAuth: []
+    summary: Get orphanages for a partner
+    tags: [Partnership]
     parameters:
       - in: path
-        name: id
+        name: partnershipId
         required: true
         schema:
           type: integer
-        description: ID of the donation
+        description: ID of the partner
       - in: query
         name: page
         schema:
@@ -336,126 +340,10 @@
         schema:
           type: integer
           default: 10
-        description: Number of updates per page
+        description: Number of orphanages per page
     responses:
       200:
-        description: Donation updates retrieved successfully
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                totalItems:
-                  type: integer
-                  example: 5
-                totalPages:
-                  type: integer
-                  example: 1
-                currentPage:
-                  type: integer
-                  example: 1
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DonationsTracking'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin or donor only
-      404:
-        description: Donation not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Donation not found
-      500:
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Internal Server Error
-
-/{id}/updates/{updateId}:
-  get:
-    summary: Get a specific update for a specific donation
-    tags: [Donation]
-    security:
-      - bearerAuth: []
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: integer
-        description: ID of the donation
-      - in: path
-        name: updateId
-        required: true
-        schema:
-          type: integer
-        description: ID of the update
-    responses:
-      200:
-        description: Donation update retrieved successfully
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonationsTracking'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin or donor only
-      404:
-        description: Donation or update not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Donation or update not found
-      500:
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Internal Server Error
-
-/updates:
-  get:
-    summary: Get all donation updates
-    tags: [Donation]
-    security:
-      - bearerAuth: []
-    parameters:
-      - in: query
-        name: page
-        schema:
-          type: integer
-          default: 1
-        description: Page number
-      - in: query
-        name: limit
-        schema:
-          type: integer
-          default: 10
-        description: Number of updates per page
-    responses:
-      200:
-        description: All donation updates retrieved successfully
+        description: List of orphanages retrieved successfully
         content:
           application/json:
             schema:
@@ -473,11 +361,17 @@
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/DonationsTracking'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin only
+                    $ref: '#/components/schemas/Orphanage'
+      404:
+        description: Partner not found or no orphanages found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner not found or no orphanages found
       500:
         description: Internal Server Error
         content:
@@ -489,32 +383,28 @@
                   type: string
                   example: Internal Server Error
 
-/updates/{id}:
-  get:
-    summary: Get a donation update by ID
-    tags: [Donation]
+/{partnershipId}/orphanages/{orphanageId}:
+  post:
+    summary: Link a partner to an orphanage
+    tags: [Partnership]
     security:
       - bearerAuth: []
     parameters:
       - in: path
-        name: id
+        name: partnershipId
         required: true
         schema:
           type: integer
-        description: ID of the update to retrieve
+        description: ID of the partner
+      - in: path
+        name: orphanageId
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
     responses:
-      200:
-        description: Donation update retrieved successfully
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonationsTracking'
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admin only
-      404:
-        description: Update not found
+      201:
+        description: Partner linked to orphanage successfully
         content:
           application/json:
             schema:
@@ -522,7 +412,85 @@
               properties:
                 message:
                   type: string
-                  example: Update not found
+                  example: Partner linked to orphanage successfully
+      400:
+        description: Invalid input or already linked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner is already linked to this orphanage
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner or orphanage not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner or orphanage not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+  delete:
+    summary: Unlink a partner from an orphanage
+    tags: [Partnership]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: partnershipId
+        required: true
+        schema:
+          type: integer
+        description: ID of the partner
+      - in: path
+        name: orphanageId
+        required: true
+        schema:
+          type: integer
+        description: ID of the orphanage
+    responses:
+      200:
+        description: Partner unlinked from orphanage successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner unlinked from orphanage successfully
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Partner or orphanage not found or not linked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Partner or orphanage not found or not linked
       500:
         description: Internal Server Error
         content:

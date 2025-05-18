@@ -31,6 +31,18 @@ const orphanageYaml = YAML.load(orphanagePath);
 const donationPath = path.join(__dirname, '../docs/paths/donation.yaml');
 const donationYaml = YAML.load(donationPath);
 
+// Load and inline the review.yaml file
+const reviewPath = path.join(__dirname, '../docs/paths/review.yaml');
+const reviewYaml = YAML.load(reviewPath);
+
+// Load and inline the deliveryTracking.yaml file
+const deliveryTrackingPath = path.join(__dirname, '../docs/paths/deliveryTracking.yaml');
+const deliveryTrackingYaml = YAML.load(deliveryTrackingPath);
+
+// Load and inline the partnership.yaml file
+const partnershipPath = path.join(__dirname, '../docs/paths/partnership.yaml');
+const partnershipYaml = YAML.load(partnershipPath);
+
 // Merge the paths into the base paths
 baseYaml.paths = {
     // User endpoints
@@ -74,7 +86,22 @@ baseYaml.paths = {
     '/donation/{id}': donationYaml['/{id}'],
     '/donation/{id}/updates': donationYaml['/{id}/updates'],
     '/donation/{id}/updates/{updateId}': donationYaml['/{id}/updates/{updateId}'],
-    '/donation': donationYaml['/']
+    '/donation': donationYaml['/'],
+
+    // Review endpoints
+    '/review/{id}': reviewYaml['/{id}'],
+    '/review': reviewYaml['/'],
+
+    // DeliveryTracking endpoints
+    '/deliveryTracking/{id}': deliveryTrackingYaml['/{id}'],
+    '/deliveryTracking/{id}/location': deliveryTrackingYaml['/{id}/location'],
+    '/deliveryTracking': deliveryTrackingYaml['/'],
+
+    // Partnership endpoints
+    '/partnership/{id}': partnershipYaml['/{id}'],
+    '/partnership/{partnershipId}/orphanages': partnershipYaml['/{partnershipId}/orphanages'],
+    '/partnership/{partnershipId}/orphanages/{orphanageId}': partnershipYaml['/{partnershipId}/orphanages/{orphanageId}'],
+    '/partnership': partnershipYaml['/']
 };
 
 module.exports = {

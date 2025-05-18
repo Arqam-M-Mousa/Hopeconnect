@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const DonationTracking = sequelize.define('donationsTracking', {
+const DonationsTracking = sequelize.define('donationsTracking', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, donationId: {
@@ -28,4 +28,4 @@ const DonationTracking = sequelize.define('donationsTracking', {
     paranoid: true,
 });
 
-module.exports = DonationTracking;
+module.exports = DonationsTracking;

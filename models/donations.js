@@ -28,6 +28,8 @@ const Donation = sequelize.define('donations', {
         type: DataTypes.INTEGER,
     }, transactionId: {
         type: DataTypes.STRING, allowNull: false, unique: true,
+    }, campaignId: {
+        type: DataTypes.INTEGER, allowNull: true
     }, createdBy: {
         type: DataTypes.INTEGER, allowNull: false
     }, transactionFee: {

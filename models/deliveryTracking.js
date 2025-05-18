@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../config/database');
 
-const deliveryTracking = sequelize.define('deliveryTracking', {
+const deliveryTracking = sequelize.define('deliveriesTracking', {
     id: {
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true
     }, donationId: {
