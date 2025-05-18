@@ -4,10 +4,14 @@ const Orphan = require("./orphans");
 const User = require("./users");
 const Sponsorship = require("./sponsorships");
 const Volunteer = require("./volunteers");
-const VolunteerHelpRequest = require("./volunteerHelpRequests");
+const VolunteerHelpRequest = require("./volunteer-helpRequests");
 const Donation = require("./donations");
 const DonationsTracking = require("./donationsTracking");
 const Review = require("./reviews");
+const DeliveryTracking = require("./deliveryTracking");
+const Partnership = require('./partnerships');
+const OrphanagePartnership = require('./orphanage-partnerships');
+
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
 OrphanageHelpRequest.belongsTo(Orphanage, {foreignKey: "orphanageId"});
@@ -50,6 +54,21 @@ OrphanageHelpRequest.belongsToMany(Volunteer, {
     otherKey: 'volunteerId'
 });
 
+Donation.hasMany(DeliveryTracking, { foreignKey: 'donationId', onDelete: 'CASCADE' });
+DeliveryTracking.belongsTo(Donation, { foreignKey: 'donationId' });
+
+Orphanage.belongsToMany(Partnership,
+    { through: OrphanagePartnership,
+        foreignKey: 'orphanageId',
+        otherKey: 'partnerId'
+    });
+Partnership.belongsToMany(Orphanage,
+    { through: OrphanagePartnership,
+        foreignKey: 'partnerId',
+        otherKey: 'orphanageId'
+    });
+
+
 
 
 const models = {
@@ -62,7 +81,10 @@ const models = {
     DonationsTracking,
     Volunteer,
     VolunteerHelpRequest,
-    Review
+    Review,
+    DeliveryTracking,
+    Partner: Partnership,
+    OrphanagePartner: OrphanagePartnership,
 }
 
 module.exports = models;
