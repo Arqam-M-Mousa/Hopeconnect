@@ -34,7 +34,24 @@ exports.getDonations = async (req, res) => {
 
 exports.donate = async (req, res) => {
     try {
-        const newDonation = await Donation.create(req.body);
+        const amount = parseFloat(req.body.amount);
+        const feeRate = parseFloat(req.body.transactionFeeRate) || 0;
+
+        if (isNaN(amount) || amount <= 0) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid amount" });
+        }
+        if (isNaN(feeRate) || feeRate < 0 || feeRate > 1) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid transaction fee rate" });
+        }
+
+        const transactionFee = parseFloat((amount * feeRate).toFixed(2));
+        const netAmount = parseFloat((amount - transactionFee).toFixed(2));
+
+        const newDonation = await Donation.create({
+            ...req.body,
+            transactionFee,
+            netAmount
+        });
 
         await DonationTracking.create({
             donationId: newDonation.id,
@@ -47,12 +64,14 @@ exports.donate = async (req, res) => {
         });
 
         res.status(HTTP_STATUS.CREATED).json({
-            message: "Donation created successfully", Donation: newDonation
+            message: "Donation created successfully",
+            donation: newDonation
         });
     } catch (error) {
         handleError(res, error);
     }
 };
+
 
 exports.updateDonation = async (req, res) => {
     try {
