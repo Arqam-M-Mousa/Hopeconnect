@@ -4,13 +4,13 @@ const Orphan = require("./orphans");
 const User = require("./users");
 const Sponsorship = require("./sponsorships");
 const Volunteer = require("./volunteers");
-const VolunteerHelpRequest = require("./volunteer-helpRequests");
+const VolunteerHelpRequest = require("./volunteer_helpRequests");
 const Donation = require("./donations");
 const DonationsTracking = require("./donationsTracking");
 const Review = require("./reviews");
 const DeliveryTracking = require("./deliveryTracking");
 const Partnership = require('./partnerships');
-const OrphanagePartnership = require('./orphanage-partnerships');
+const OrphanagePartnership = require('./orphanage_partnerships');
 const Campaign = require('./campaigns');
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
