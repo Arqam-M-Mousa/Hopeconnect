@@ -11,7 +11,7 @@ const Review = require("./reviews");
 const DeliveryTracking = require("./deliveryTracking");
 const Partnership = require('./partnerships');
 const OrphanagePartnership = require('./orphanage-partnerships');
-
+const Campaign = require('./campaigns');
 
 Orphanage.hasMany(OrphanageHelpRequest, {foreignKey: "orphanageId"});
 OrphanageHelpRequest.belongsTo(Orphanage, {foreignKey: "orphanageId"});
@@ -68,7 +68,8 @@ Partnership.belongsToMany(Orphanage,
         otherKey: 'orphanageId'
     });
 
-
+Campaign.hasMany(Donation, { foreignKey: 'campaignId', onDelete: 'CASCADE' });
+Donation.belongsTo(Campaign, { foreignKey: 'campaignId' });
 
 
 const models = {
@@ -85,6 +86,7 @@ const models = {
     DeliveryTracking,
     Partner: Partnership,
     OrphanagePartner: OrphanagePartnership,
+    Campaign,
 }
 
 module.exports = models;
