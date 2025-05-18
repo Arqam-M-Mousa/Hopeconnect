@@ -1,6 +1,6 @@
 /:
   get:
-    summary: Get all donations (admin only)
+    summary: Get all donations
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -38,20 +38,10 @@
                   type: array
                   items:
                     $ref: '#/components/schemas/Donation'
-      404:
-        description: No donations found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Donations not found
       401:
         description: Unauthorized - Authentication required
       403:
-        description: Forbidden - Admins only
+        description: Forbidden - Admin only
       500:
         description: Internal Server Error
         content:
@@ -74,7 +64,7 @@
         application/json:
           schema:
             type: object
-            required: [amount, category, donationType, orphanageId, transactionId]
+            required: [amount, category, donationType, orphanageId]
             properties:
               amount:
                 type: number
@@ -97,9 +87,6 @@
               sponsorshipId:
                 type: integer
                 example: 2
-              transactionId:
-                type: string
-                example: "tx_12345678"
     responses:
       201:
         description: Donation created successfully
@@ -111,10 +98,10 @@
                 message:
                   type: string
                   example: Donation created successfully
-                Donation:
+                donation:
                   $ref: '#/components/schemas/Donation'
       400:
-        description: Bad request - Missing required fields or invalid data
+        description: Invalid input
         content:
           application/json:
             schema:
@@ -122,121 +109,11 @@
               properties:
                 message:
                   type: string
-                  example: Missing required fields
+                  example: Invalid input data
       401:
         description: Unauthorized - Authentication required
       403:
-        description: Forbidden - Donors only
-      500:
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Internal Server Error
-
-/updates:
-  get:
-    summary: Get all donation updates (admin only)
-    tags: [Donation]
-    security:
-      - bearerAuth: []
-    parameters:
-      - in: query
-        name: page
-        schema:
-          type: integer
-          default: 1
-        description: Page number
-      - in: query
-        name: limit
-        schema:
-          type: integer
-          default: 10
-        description: Number of updates per page
-    responses:
-      200:
-        description: List of updates retrieved successfully
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                totalItems:
-                  type: integer
-                  example: 100
-                totalPages:
-                  type: integer
-                  example: 10
-                currentPage:
-                  type: integer
-                  example: 1
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DonationTracking'
-      404:
-        description: No updates found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Updates not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins only
-      500:
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Internal Server Error
-
-/updates/{id}:
-  get:
-    summary: Get update by ID (admin only)
-    tags: [Donation]
-    security:
-      - bearerAuth: []
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: integer
-        description: ID of the update to retrieve
-    responses:
-      200:
-        description: Update retrieved successfully
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonationTracking'
-      404:
-        description: Update not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Update not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins only
+        description: Forbidden - Donor only
       500:
         description: Internal Server Error
         content:
@@ -250,7 +127,7 @@
 
 /{id}:
   get:
-    summary: Get donation by ID (admin only)
+    summary: Get a donation by ID
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -268,6 +145,10 @@
           application/json:
             schema:
               $ref: '#/components/schemas/Donation'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
       404:
         description: Donation not found
         content:
@@ -278,10 +159,6 @@
                 message:
                   type: string
                   example: Donation not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins only
       500:
         description: Internal Server Error
         content:
@@ -294,7 +171,7 @@
                   example: Internal Server Error
 
   put:
-    summary: Update donation (admin only)
+    summary: Update a donation
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -312,19 +189,25 @@
           schema:
             type: object
             properties:
+              amount:
+                type: number
+                format: float
+                example: 150.00
+              category:
+                type: string
+                enum: [general-funds, education, medical, emergency]
+                example: medical
+              donationType:
+                type: string
+                enum: [money, clothes, food, educational, other]
+                example: money
+              description:
+                type: string
+                example: "Updated donation for medical supplies"
               status:
                 type: string
                 enum: [pending, completed, failed]
                 example: completed
-              title:
-                type: string
-                example: "Donation Processed"
-              description:
-                type: string
-                example: "Your donation has been processed successfully."
-              imageUrl:
-                type: string
-                example: "https://example.com/images/donation-receipt.jpg"
     responses:
       200:
         description: Donation updated successfully
@@ -338,6 +221,20 @@
                   example: Donation updated successfully
                 donation:
                   $ref: '#/components/schemas/Donation'
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid input data
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
       404:
         description: Donation not found
         content:
@@ -348,10 +245,6 @@
                 message:
                   type: string
                   example: Donation not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins only
       500:
         description: Internal Server Error
         content:
@@ -364,7 +257,7 @@
                   example: Internal Server Error
 
   delete:
-    summary: Delete donation (admin only)
+    summary: Delete a donation
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -386,6 +279,10 @@
                 message:
                   type: string
                   example: Donation deleted successfully
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
       404:
         description: Donation not found
         content:
@@ -396,10 +293,6 @@
                 message:
                   type: string
                   example: Donation not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins only
       500:
         description: Internal Server Error
         content:
@@ -413,7 +306,7 @@
 
 /{id}/updates:
   get:
-    summary: Get updates for a specific donation (admin or donor)
+    summary: Get updates for a specific donation
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -438,7 +331,7 @@
         description: Number of updates per page
     responses:
       200:
-        description: Updates retrieved successfully
+        description: Donation updates retrieved successfully
         content:
           application/json:
             schema:
@@ -446,10 +339,10 @@
               properties:
                 totalItems:
                   type: integer
-                  example: 100
+                  example: 5
                 totalPages:
                   type: integer
-                  example: 10
+                  example: 1
                 currentPage:
                   type: integer
                   example: 1
@@ -457,8 +350,12 @@
                   type: array
                   items:
                     $ref: '#/components/schemas/DonationTracking'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin or donor only
       404:
-        description: Updates for user not found
+        description: Donation not found
         content:
           application/json:
             schema:
@@ -466,11 +363,7 @@
               properties:
                 message:
                   type: string
-                  example: Updates for user not found
-      401:
-        description: Unauthorized - Authentication required
-      403:
-        description: Forbidden - Admins or donors only
+                  example: Donation not found
       500:
         description: Internal Server Error
         content:
@@ -484,7 +377,7 @@
 
 /{id}/updates/{updateId}:
   get:
-    summary: Get a specific update for a donation (admin or donor)
+    summary: Get a specific update for a specific donation
     tags: [Donation]
     security:
       - bearerAuth: []
@@ -503,13 +396,17 @@
         description: ID of the update
     responses:
       200:
-        description: Update retrieved successfully
+        description: Donation update retrieved successfully
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/DonationTracking'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin or donor only
       404:
-        description: Donation not found
+        description: Donation or update not found
         content:
           application/json:
             schema:
@@ -517,11 +414,107 @@
               properties:
                 message:
                   type: string
-                  example: Donation not found
+                  example: Donation or update not found
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/updates:
+  get:
+    summary: Get all donation updates
+    tags: [Donation]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Number of updates per page
+    responses:
+      200:
+        description: All donation updates retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalItems:
+                  type: integer
+                  example: 100
+                totalPages:
+                  type: integer
+                  example: 10
+                currentPage:
+                  type: integer
+                  example: 1
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DonationTracking'
       401:
         description: Unauthorized - Authentication required
       403:
-        description: Forbidden - Admins or donors only
+        description: Forbidden - Admin only
+      500:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal Server Error
+
+/updates/{id}:
+  get:
+    summary: Get a donation update by ID
+    tags: [Donation]
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID of the update to retrieve
+    responses:
+      200:
+        description: Donation update retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DonationTracking'
+      401:
+        description: Unauthorized - Authentication required
+      403:
+        description: Forbidden - Admin only
+      404:
+        description: Update not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Update not found
       500:
         description: Internal Server Error
         content:
