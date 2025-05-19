@@ -8,11 +8,8 @@ dotenv.config();
 
 exports.getCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id, {
-            attributes: {exclude: ['password']}
-        });
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
-
         res.status(HTTP_STATUS.OK).json({
             message: 'Profile fetched successfully', volunteer
         });
@@ -24,9 +21,8 @@ exports.getCurrentVolunteerProfile = async (req, res) => {
 
 exports.updateCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id, {
-            attributes: {exclude: ['password']}
-        });
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
+
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         const updatableFields = ['servicesOffered', 'availability', 'preferredLocation', 'skills', 'experience'];
@@ -49,7 +45,7 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
 
 exports.deleteCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id);
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
@@ -110,17 +106,22 @@ exports.getVolunteers = async (req, res) => {
 
 exports.searchVolunteers = async (req, res) => {
     try {
-        const {skill, availability} = req.query;
+        const { skill, availability } = req.query;
 
-        const volunteers = await Volunteer.findAll({
-            where: {
-                ...(availability && {availability}),
-            }, include: [{
-                model: Volunteer, where: skill ? {name: {[Op.like]: `%${skill}%`}} : {}, required: !!skill
-            }]
-        });
+        const whereClause = {};
+        if (availability) {
+            whereClause.availability = availability;
+        }
+        if (skill) {
+            whereClause.skills = {
+                [Op.overlap]: [skill]
+            };
+        }
+
+        const volunteers = await Volunteer.findAll({where: whereClause});
 
         res.status(HTTP_STATUS.OK).json(volunteers);
+
     } catch (error) {
         handleError(res, error);
     }
