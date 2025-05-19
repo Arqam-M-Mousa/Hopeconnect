@@ -87,9 +87,46 @@ Once the server is running, you can access:
 - API documentation at `http://localhost:3000/api-docs/`
 - Health check at `http://localhost:3000/health`
 
-## API Documentation
+## Documentation
+
+### API Documentation
 
 The API is documented using Swagger. After starting the server, visit `http://localhost:3000/api-docs/` to explore the available endpoints.
+
+### Project Documentation
+
+Comprehensive project documentation is available using Docsify. To access the documentation:
+```bash
+# Start the documentation server
+npm run docs
+```
+After starting the server, visit `http://localhost:3030` to explore the documentation.
+
+> Note: The JSDoc documentation provides detailed API reference for developers working with the codebase, while the Docsify documentation provides higher-level project documentation.
+
+The documentation includes:
+- Getting Started Guide
+- System Architecture
+- API Documentation
+- Database Models
+- Routes and Controllers
+- Services
+- Middleware
+- Utilities
+- Configuration
+- Development Guide
+- Deployment Instructions
+
+### Code Documentation
+
+The codebase is documented using JSDoc. To generate the code documentation:
+
+```bash
+# Generate only the code documentation
+npm run docs:jsdoc
+```
+
+Then open `docs/code/index.html` in your browser to view the code documentation.
 
 ### Main API Endpoints
 
@@ -145,7 +182,7 @@ HopeConnect ensures data integrity for critical operations through atomic transa
     // Perform multiple database operations
     await Donation.create({ amount, userId, orphanageId }, { transaction });
     await OrphanageBalance.increment('balance', { by: amount, where: { id: orphanageId }, transaction });
-    
+
     await transaction.commit();
   } catch (error) {
     await transaction.rollback();
