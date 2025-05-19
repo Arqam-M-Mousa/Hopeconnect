@@ -30,8 +30,7 @@ exports.updateDelivery = async (req, res) => {
 
 exports.deleteDelivery = async (req, res) => {
     try {
-        const {id} = req.params;
-        const delivery = await Delivery.findByPk({where: {id}});
+        const delivery = await Delivery.findByPk(req.params.id);
         if (!delivery) return res.status(HTTP_STATUS.NOT_FOUND).json({error: 'Delivery not found'});
         await delivery.destroy();
         res.status(HTTP_STATUS.OK).json({message: 'Delivery deleted successfully'});
