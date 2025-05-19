@@ -3,6 +3,26 @@ const {sequelize,DatabaseConnection} = require('../config/database');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 
+/**
+ * @module services/sponsorship
+ * @description Service functions for sponsorship-related operations
+ */
+
+/**
+ * Create a new sponsorship
+ * @async
+ * @function createSponsorship
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing sponsorship data
+ * @param {number} req.body.orphanId - ID of the orphan to sponsor
+ * @param {string} req.body.frequency - Frequency of sponsorship (monthly, quarterly, yearly, one-time)
+ * @param {number} req.body.amount - Amount to contribute per frequency
+ * @param {string} [req.body.notes] - Additional notes about the sponsorship
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (sponsor)
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with created sponsorship details
+ */
 exports.createSponsorship = async (req, res) => {
     try {
         if (!req.body.orphanId || !req.body.frequency) {
@@ -64,7 +84,16 @@ exports.createSponsorship = async (req, res) => {
     }
 };
 
-
+/**
+ * Get a sponsorship by ID
+ * @async
+ * @function getSponsorshipById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Sponsorship ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with sponsorship details
+ */
 exports.getSponsorshipById = async (req, res) => {
     try {
         const sponsorship = await Sponsorship.findByPk(req.params.id);
@@ -79,6 +108,23 @@ exports.getSponsorshipById = async (req, res) => {
     }
 };
 
+/**
+ * Update a sponsorship
+ * @async
+ * @function updateSponsorship
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body with fields to update
+ * @param {number} req.body.sponsorshipId - ID of the sponsorship to update
+ * @param {string} [req.body.status] - Updated status of the sponsorship (active, paused, ended)
+ * @param {number} [req.body.amount] - Updated amount to contribute
+ * @param {string} [req.body.frequency] - Updated frequency of sponsorship
+ * @param {Date} [req.body.endDate] - End date of the sponsorship
+ * @param {string} [req.body.notes] - Updated notes about the sponsorship
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (sponsor)
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with updated sponsorship details
+ */
 exports.updateSponsorship = async (req, res) => {
     try {
         if (!req.body.sponsorshipId) {
@@ -118,6 +164,18 @@ exports.updateSponsorship = async (req, res) => {
         handleError(res, error);
     }
 };
+/**
+ * Delete a sponsorship
+ * @async
+ * @function deleteSponsorship
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Sponsorship ID
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (sponsor)
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with deletion confirmation
+ */
 exports.deleteSponsorship = async (req, res) => {
     try {
         const sponsorship = await Sponsorship.findByPk(req.params.id);
@@ -136,6 +194,17 @@ exports.deleteSponsorship = async (req, res) => {
         res.status(HTTP_STATUS.SERVER_ERROR).json({message: 'Server error', error});
     }
 };
+/**
+ * Get all active sponsorships with pagination
+ * @async
+ * @function getSponsorships
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {number} [req.query.page=1] - Page number for pagination
+ * @param {number} [req.query.limit=10] - Number of items per page
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with paginated active sponsorships list
+ */
 exports.getSponsorships = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);

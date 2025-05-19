@@ -4,12 +4,32 @@ const {HTTP_STATUS, handleError} = require('../utils/responses');
 const nodemailer = require('nodemailer')
 require('dotenv').config();
 
+/**
+ * @module services/donation
+ * @description Service functions for donation-related operations
+ */
+
+/**
+ * Nodemailer transporter for sending emails
+ * @type {nodemailer.Transporter}
+ * @private
+ */
 const transporter = nodemailer.createTransport({
     service: 'gmail', auth: {
         user: process.env.EMAIL_ADDRESS, pass: process.env.EMAIL_PASSWORD
     }
 });
 
+/**
+ * Send an email notification for emergency donations
+ * @async
+ * @function sendEmergencyEmail
+ * @param {string} email - Recipient email address
+ * @param {number} amount - Donation amount
+ * @param {string} campaignTitle - Title of the emergency campaign
+ * @returns {Promise<void>}
+ * @private
+ */
 const sendEmergencyEmail = async (email, amount, campaignTitle) => {
     const mailOptions = {
         from: process.env.EMAIL_ADDRESS,
@@ -18,8 +38,18 @@ const sendEmergencyEmail = async (email, amount, campaignTitle) => {
         text: `Thank you for your donation of $${amount} towards "${campaignTitle}". Your help is urgently needed and appreciated!`
     };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
+/**
+ * Get a donation by ID
+ * @async
+ * @function getDonationByID
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Donation ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with donation details
+ */
 exports.getDonationByID = async (req, res) => {
     try {
         const donation = await Donation.findByPk(req.params.id);
@@ -34,6 +64,17 @@ exports.getDonationByID = async (req, res) => {
     }
 };
 
+/**
+ * Get all donations with pagination
+ * @async
+ * @function getDonations
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {number} [req.query.page=1] - Page number for pagination
+ * @param {number} [req.query.limit=10] - Number of items per page
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with paginated donations list
+ */
 exports.getDonations = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -49,6 +90,24 @@ exports.getDonations = async (req, res) => {
     }
 };
 
+/**
+ * Create a new donation
+ * @async
+ * @function donate
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing donation data
+ * @param {number} req.body.amount - Donation amount
+ * @param {number} [req.body.transactionFee] - Transaction fee rate (0-1)
+ * @param {string} req.body.category - Donation category
+ * @param {string} req.body.donationType - Type of donation
+ * @param {number} req.body.orphanageId - ID of the orphanage receiving the donation
+ * @param {number} [req.body.campaignId] - ID of the campaign (if applicable)
+ * @param {string} [req.body.status='pending'] - Status of the donation
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with created donation details
+ */
 exports.donate = async (req, res) => {
     try {
         const amount = parseFloat(req.body.amount);
@@ -105,6 +164,24 @@ exports.donate = async (req, res) => {
     }
 };
 
+/**
+ * Update a donation and create a tracking record
+ * @async
+ * @function updateDonation
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Donation ID
+ * @param {Object} req.body - Request body with fields to update
+ * @param {string} [req.body.status] - Updated status of the donation
+ * @param {string} [req.body.title] - Title for the tracking update
+ * @param {string} [req.body.description] - Description for the tracking update
+ * @param {string} [req.body.imageUrl] - Image URL for the tracking update
+ * @param {number} [req.body.userId] - User ID creating the update
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with updated donation details
+ */
 exports.updateDonation = async (req, res) => {
     try {
         const donation = await Donation.findByPk(req.params.id);
@@ -133,6 +210,16 @@ exports.updateDonation = async (req, res) => {
     }
 };
 
+/**
+ * Delete a donation
+ * @async
+ * @function deleteDonation
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Donation ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with deletion confirmation
+ */
 exports.deleteDonation = async (req, res) => {
     try {
         const donation = await Donation.findByPk(req.params.id);
@@ -149,6 +236,17 @@ exports.deleteDonation = async (req, res) => {
     }
 };
 
+/**
+ * Get all donation tracking updates with pagination
+ * @async
+ * @function getAllUpdates
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {number} [req.query.page=1] - Page number for pagination
+ * @param {number} [req.query.limit=10] - Number of items per page
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with paginated donation updates
+ */
 exports.getAllUpdates = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -164,6 +262,19 @@ exports.getAllUpdates = async (req, res) => {
     }
 };
 
+/**
+ * Get updates for a specific donation with pagination
+ * @async
+ * @function getUserDonationsUpdates
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Donation ID
+ * @param {Object} req.query - Query parameters
+ * @param {number} [req.query.page=1] - Page number for pagination
+ * @param {number} [req.query.limit=10] - Number of items per page
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with paginated updates for a specific donation
+ */
 exports.getUserDonationsUpdates = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -181,6 +292,17 @@ exports.getUserDonationsUpdates = async (req, res) => {
     }
 };
 
+/**
+ * Get a specific update for a donation
+ * @async
+ * @function getUserUpdateById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Donation ID
+ * @param {string} req.params.updateId - Update ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with specific donation update
+ */
 exports.getUserUpdateById = async (req, res) => {
     try {
         const donationId = req.params.id;
@@ -200,6 +322,16 @@ exports.getUserUpdateById = async (req, res) => {
     }
 };
 
+/**
+ * Get a donation update by ID
+ * @async
+ * @function getUpdateById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Update ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with donation update details
+ */
 exports.getUpdateById = async (req, res) => {
     try {
         const donation = await DonationsTracking.findByPk(req.params.id);

@@ -6,6 +6,21 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
+/**
+ * @module services/volunteer
+ * @description Service functions for volunteer-related operations
+ */
+
+/**
+ * Get the current authenticated volunteer's profile
+ * @async
+ * @function getCurrentVolunteerProfile
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with volunteer profile details
+ */
 exports.getCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id, {
@@ -22,6 +37,22 @@ exports.getCurrentVolunteerProfile = async (req, res) => {
     }
 };
 
+/**
+ * Update the current authenticated volunteer's profile
+ * @async
+ * @function updateCurrentVolunteerProfile
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user
+ * @param {Object} req.body - Request body with fields to update
+ * @param {Array<string>} [req.body.servicesOffered] - Updated services offered
+ * @param {string} [req.body.availability] - Updated availability
+ * @param {string} [req.body.preferredLocation] - Updated preferred location
+ * @param {string} [req.body.skills] - Updated skills
+ * @param {string} [req.body.experience] - Updated experience
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with updated volunteer profile details
+ */
 exports.updateCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id, {
@@ -47,6 +78,16 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
     }
 };
 
+/**
+ * Delete the current authenticated volunteer's profile
+ * @async
+ * @function deleteCurrentVolunteerProfile
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with deletion confirmation
+ */
 exports.deleteCurrentVolunteerProfile = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.user.id);
@@ -59,6 +100,16 @@ exports.deleteCurrentVolunteerProfile = async (req, res) => {
     }
 };
 
+/**
+ * Get a volunteer by ID
+ * @async
+ * @function getVolunteerById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Volunteer ID
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with volunteer details
+ */
 exports.getVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
@@ -69,6 +120,16 @@ exports.getVolunteerById = async (req, res) => {
     }
 };
 
+/**
+ * Delete a volunteer by ID (admin function)
+ * @async
+ * @function deleteVolunteerById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Volunteer ID to delete
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with deletion confirmation
+ */
 exports.deleteVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
@@ -81,6 +142,16 @@ exports.deleteVolunteerById = async (req, res) => {
     }
 };
 
+/**
+ * Verify a volunteer (admin function)
+ * @async
+ * @function verifyVolunteer
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Volunteer ID to verify
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with verification confirmation
+ */
 exports.verifyVolunteer = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id);
@@ -94,6 +165,17 @@ exports.verifyVolunteer = async (req, res) => {
     }
 };
 
+/**
+ * Get all volunteers with pagination
+ * @async
+ * @function getVolunteers
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {number} [req.query.page=1] - Page number for pagination
+ * @param {number} [req.query.limit=10] - Number of items per page
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with paginated volunteers list
+ */
 exports.getVolunteers = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
@@ -107,7 +189,17 @@ exports.getVolunteers = async (req, res) => {
     }
 };
 
-
+/**
+ * Search for volunteers by skill and availability
+ * @async
+ * @function searchVolunteers
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {string} [req.query.skill] - Skill to search for
+ * @param {string} [req.query.availability] - Availability to filter by
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with matching volunteers
+ */
 exports.searchVolunteers = async (req, res) => {
     try {
         const {skill, availability} = req.query;
@@ -125,6 +217,22 @@ exports.searchVolunteers = async (req, res) => {
         handleError(res, error);
     }
 };
+/**
+ * Update a volunteer by ID (admin function)
+ * @async
+ * @function updateVolunteerById
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Volunteer ID to update
+ * @param {Object} req.body - Request body with fields to update
+ * @param {Array<string>} [req.body.servicesOffered] - Updated services offered
+ * @param {string} [req.body.availability] - Updated availability
+ * @param {string} [req.body.preferredLocation] - Updated preferred location
+ * @param {string} [req.body.skills] - Updated skills
+ * @param {string} [req.body.experience] - Updated experience
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with updated volunteer details
+ */
 exports.updateVolunteerById = async (req, res) => {
     try {
         const volunteer = await Volunteer.findByPk(req.params.id, {
@@ -152,6 +260,18 @@ exports.updateVolunteerById = async (req, res) => {
     }
 };
 
+/**
+ * Apply to a help request as a volunteer
+ * @async
+ * @function applyToHelpRequest
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (volunteer)
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Help request ID to apply to
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with application confirmation
+ */
 exports.applyToHelpRequest = async (req, res) => {
     try {
         const volunteerId = req.user.id;
@@ -171,6 +291,16 @@ exports.applyToHelpRequest = async (req, res) => {
     }
 };
 
+/**
+ * Get applications made by the current volunteer
+ * @async
+ * @function getVolunteerApplications
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (volunteer)
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with volunteer's applications
+ */
 exports.getVolunteerApplications = async (req, res) => {
     try {
         const volunteerId = req.user.id;
@@ -185,6 +315,18 @@ exports.getVolunteerApplications = async (req, res) => {
     }
 };
 
+/**
+ * Cancel a volunteer application
+ * @async
+ * @function cancelApplication
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - Authenticated user information
+ * @param {number} req.user.id - ID of the authenticated user (volunteer)
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.applicationId - Application ID to cancel
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with cancellation confirmation
+ */
 exports.cancelApplication = async (req, res) => {
     try {
         const volunteerId = req.user.id;
@@ -204,7 +346,16 @@ exports.cancelApplication = async (req, res) => {
     }
 };
 
-
+/**
+ * Match a volunteer to suitable help request opportunities
+ * @async
+ * @function matchVolunteerToOpportunities
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - Volunteer ID to match
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with matching opportunities
+ */
 exports.matchVolunteerToOpportunities = async (req, res) => {
     try {
         const volunteerId = req.params.id;
@@ -238,4 +389,3 @@ exports.matchVolunteerToOpportunities = async (req, res) => {
         handleError(res, error);
     }
 };
-
