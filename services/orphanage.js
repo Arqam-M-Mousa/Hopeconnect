@@ -138,7 +138,7 @@ exports.getHelpRequests = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
         const result = await OrphanageHelpRequest.findAndCountAll({
-            limit, offset, order: SORT_ORDER.CREATED_DESC
+            limit, offset, order: [["createdAt", "DESC"]]
         });
 
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));
@@ -158,7 +158,7 @@ exports.getOrphanageHelpRequests = async (req, res) => {
         }
 
         const result = await OrphanageHelpRequest.findAndCountAll({
-            where: {orphanageId}, limit, offset, order: SORT_ORDER.CREATED_DESC
+            where: {orphanageId}, limit, offset, order: [["createdAt", "DESC"]]
         });
 
         res.status(HTTP_STATUS.OK).json(formatPaginatedResponse(result, page, limit));

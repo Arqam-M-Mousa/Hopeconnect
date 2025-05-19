@@ -7,7 +7,8 @@ const DonationsTracking = sequelize.define('donationsTracking', {
     }, donationId: {
         type: DataTypes.INTEGER, allowNull: false
     }, status: {
-        type: DataTypes.ENUM('received', 'processing', 'shipped', 'delivered', 'thanked'), allowNull: false
+        type: DataTypes.ENUM('pending', 'received', 'processing', 'shipped', 'completed', 'thanked'),
+        allowNull: false
     }, title: {
         type: DataTypes.STRING, allowNull: false
     }, description: {

@@ -64,7 +64,7 @@ exports.getAllPartners = async (req, res) => {
 
 exports.getOrphanagesForPartner = async (req, res) => {
     try {
-        const partner = await Partner.findByPk(req.params.partnerId);
+        const partner = await Partner.findByPk(req.params.partnershipId);
         if (!partner) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Partner not found'});
 
         const orphanages = await partner.getOrphanages();
@@ -77,8 +77,8 @@ exports.getOrphanagesForPartner = async (req, res) => {
 
 exports.linkPartnerToOrphanage = async (req, res) => {
     try {
-        const {partnerId, orphanageId} = req.params;
-        const partner = await Partner.findByPk(partnerId);
+        const {partnershipId , orphanageId} = req.params;
+        const partner = await Partner.findByPk(partnershipId );
         if (!partner) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Partner not found'});
 
         const orphanage = await Orphanage.findByPk(orphanageId);
@@ -93,8 +93,8 @@ exports.linkPartnerToOrphanage = async (req, res) => {
 
 exports.unlinkPartnerFromOrphanage = async (req, res) => {
     try {
-        const {partnerId, orphanageId} = req.params;
-        const partner = await Partner.findByPk(partnerId);
+        const {partnershipId , orphanageId} = req.params;
+        const partner = await Partner.findByPk(partnershipId );
         if (!partner) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Partner not found'});
 
         const orphanage = await Orphanage.findByPk(orphanageId);

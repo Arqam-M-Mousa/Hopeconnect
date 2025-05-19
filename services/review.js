@@ -5,7 +5,11 @@ const {HTTP_STATUS, handleError} = require('../utils/responses');
 
 exports.postReview = async (req, res) => {
     try {
-        const newReview = await Review.create(req.body);
+        const reviewData = {
+            ...req.body,
+            userId: req.user.id
+        };
+        const newReview = await Review.create(reviewData);
         res.status(HTTP_STATUS.CREATED).json({
             message: "Review created successfully", review: newReview
         });
@@ -16,7 +20,7 @@ exports.postReview = async (req, res) => {
 
 exports.deleteReview = async (req, res) => {
     try {
-        const review = await Review.findByPk(req.params.id);
+        const review = await Review.findByPk(req.body.id);
         if (!review) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Review not found"});
         }
@@ -31,7 +35,7 @@ exports.deleteReview = async (req, res) => {
 
 exports.updateReview = async (req , res) => {
     try {
-        const review = await Review.findByPk(req.params.id);
+        const review = await Review.findByPk(req.body.id);
         if (!review) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({message: "Review not found"});
         }

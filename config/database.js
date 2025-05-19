@@ -138,3 +138,4 @@ process.on('SIGTERM', async () => {
 DatabaseConnection.connect();
 
 module.exports = sequelize;
+module.exports.DatabaseConnection = DatabaseConnection;

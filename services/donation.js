@@ -53,6 +53,7 @@ exports.donate = async (req, res) => {
     try {
         const amount = parseFloat(req.body.amount);
         const feeRate = parseFloat(req.body.transactionFee) || 0;
+        const user = req.user;
 
         if (isNaN(amount) || amount <= 0) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({message: "Invalid amount"});
@@ -63,9 +64,6 @@ exports.donate = async (req, res) => {
         const transactionFee = parseFloat((amount * feeRate).toFixed(2));
         const netAmount = parseFloat((amount - transactionFee).toFixed(2));
 
-        const newDonation = await Donation.create({
-            ...req.body, transactionFee, netAmount
-        });
         let campaign = null;
         if (req.body.campaignId) {
             campaign = await Campaign.findByPk(req.body.campaignId);
@@ -73,6 +71,15 @@ exports.donate = async (req, res) => {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({message: "Invalid campaign ID"});
             }
         }
+
+        const newDonation = await Donation.create({
+            ...req.body,
+            donorId: user.id,
+            createdBy: user.id,
+            transactionFee,
+            netAmount,
+            status: req.body.status || 'pending'
+        });
 
         await DonationsTracking.create({
             donationId: newDonation.id,

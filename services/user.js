@@ -97,12 +97,11 @@ exports.updateCurrentUserProfile = async (req, res) => {
         if (phone) user.phone = phone;
         if (address) user.address = address;
 
-
         if (req.file) {
             user.profileImage = `/uploads/profiles/${req.file.filename}`;
         }
 
-        await user.update();
+        await user.save();
 
         res.status(HTTP_STATUS.OK).json({
             message: 'Profile updated successfully', user: {
@@ -116,7 +115,7 @@ exports.updateCurrentUserProfile = async (req, res) => {
             }
         });
     } catch (error) {
-        handleError(error);
+        handleError(res , error);
     }
 };
 
