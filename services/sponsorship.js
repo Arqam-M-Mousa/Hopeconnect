@@ -1,5 +1,5 @@
-const {Sponsorship} = require('../models/index.js');
-const sequelize = require('../config/database');
+const {Sponsorship , Orphan} = require('../models/index.js');
+const {sequelize,DatabaseConnection} = require('../config/database');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 
@@ -140,7 +140,7 @@ exports.getSponsorships = async (req, res) => {
     try {
         const {page, limit, offset} = getPaginationParams(req.query);
         const result = await Sponsorship.findAndCountAll({
-            where: {isAvailableForSponsorship: true}, limit, offset, order: [["createdAt", "DESC"]]
+            where: {status: 'active'}, limit, offset, order: [["createdAt", "DESC"]]
         });
 
         if (!result.rows.length) {
@@ -152,4 +152,3 @@ exports.getSponsorships = async (req, res) => {
         handleError(res, error);
     }
 };
-
