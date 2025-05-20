@@ -26,6 +26,10 @@ const orphanageHelpRequests = sequelize.define('orphanageHelpRequests', {
         type: DataTypes.INTEGER, allowNull: false, references: {
             model: 'orphanages', key: 'id'
         }
+    }, preferredLocation: {
+        type: DataTypes.TEXT,
+    }, availability: {
+        type: DataTypes.TEXT,
     }
 }, {
     timestamps: true
