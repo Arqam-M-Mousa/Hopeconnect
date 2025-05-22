@@ -1,4 +1,5 @@
-const {User, Sponsorship, Donation, Orphan} = require('../models/index.js');
+
+const {User, Sponsorship, Donation, Orphan,Volunteer} = require('../models/index.js');
 const {formatPaginatedResponse, getPaginationParams} = require('../utils/pagination');
 const {HTTP_STATUS, handleError} = require('../utils/responses');
 const jwt = require('jsonwebtoken');
@@ -40,24 +41,66 @@ const generateToken = (user) => {
  */
 exports.register = async (req, res) => {
     try {
-        const email = req.body.email;
-        const existingUser = await User.findOne({where: {email}});
+        const {
+            name,
+            email,
+            password,
+            role,
+            phone,
+            address,
+            profileImage,
+
+            servicesOffered,
+            availability,
+            preferredLocation,
+            skills,
+            experience
+        } = req.body;
+
+        const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'User already exists'});
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: 'User already exists' });
         }
 
-        const user = req.body;
-        const token = generateToken(user);
+        const newUser = await User.create({
+            name,
+            email,
+            password,
+            role,
+            phone,
+            address,
+            profileImage
+        });
+
+
+        if(role==='volunteer'){
+            await Volunteer.create({
+                userId: newUser.id,
+                servicesOffered: servicesOffered ||[],
+                availability,
+                preferredLocation,
+                skills,
+                experience
+            })
+        }
+
+        const token = generateToken(newUser);
+
         if (!token) {
             return res.status(HTTP_STATUS.UNAUTHORIZED).json({
                 message: 'Invalid token'
             });
         }
-        await User.create(req.body);
-
         res.status(HTTP_STATUS.CREATED).json({
-            message: "user registered successfully", user: user, token
-        });
+            message: 'Registration successful',
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role
+            },
+            token
+        })
     } catch (error) {
         handleError(res, error);
     }
@@ -298,8 +341,7 @@ exports.getUserById = async function (req, res) {
  * @private
  */
 const calculateDashboardStats = (donations, sponsorships) => {
-    const totalDonated = donations.reduce((sum, donation) =>
-        sum + parseFloat(donation.amount), 0);
+    const totalDonated = donations.reduce((sum, donation) => sum + parseFloat(donation.amount), 0);
     return {
         totalDonations: donations.length,
         totalDonated: totalDonated,
@@ -330,10 +372,7 @@ exports.getDashboard = async (req, res) => {
         }
 
         const donationsResult = await Donation.findAndCountAll({
-            where: {donorId: req.user.id},
-            limit,
-            offset,
-            order: [['createdAt', 'DESC']]
+            where: {donorId: req.user.id}, limit, offset, order: [['createdAt', 'DESC']]
         });
 
         const sponsorshipsResult = await Sponsorship.findAndCountAll({
@@ -348,9 +387,7 @@ exports.getDashboard = async (req, res) => {
 
         res.status(HTTP_STATUS.OK).json({
             donorInfo: {
-                name: user.name,
-                email: user.email,
-                profileImage: user.profileImage
+                name: user.name, email: user.email, profileImage: user.profileImage
             },
             stats,
             donations: formatPaginatedResponse(donationsResult, page, limit),
