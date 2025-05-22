@@ -71,6 +71,13 @@ Partnership.belongsToMany(Orphanage,
 Campaign.hasMany(Donation, { foreignKey: 'campaignId', onDelete: 'CASCADE' });
 Donation.belongsTo(Campaign, { foreignKey: 'campaignId' });
 
+User.hasOne(Volunteer, {
+    foreignKey: 'userId',
+    onDelete: 'CASCADE'
+});
+Volunteer.belongsTo(User, {
+    foreignKey: 'userId'
+});
 
 const models = {
     Orphanage,

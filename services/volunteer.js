@@ -23,11 +23,8 @@ dotenv.config();
  */
 exports.getCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id, {
-            attributes: {exclude: ['password']}
-        });
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
-
         res.status(HTTP_STATUS.OK).json({
             message: 'Profile fetched successfully', volunteer
         });
@@ -55,9 +52,8 @@ exports.getCurrentVolunteerProfile = async (req, res) => {
  */
 exports.updateCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id, {
-            attributes: {exclude: ['password']}
-        });
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
+
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         const updatableFields = ['servicesOffered', 'availability', 'preferredLocation', 'skills', 'experience'];
@@ -90,7 +86,7 @@ exports.updateCurrentVolunteerProfile = async (req, res) => {
  */
 exports.deleteCurrentVolunteerProfile = async (req, res) => {
     try {
-        const volunteer = await Volunteer.findByPk(req.user.id);
+        const volunteer = await Volunteer.findOne({where : {userId : req.user.id}});
         if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
         await volunteer.destroy();
@@ -202,17 +198,22 @@ exports.getVolunteers = async (req, res) => {
  */
 exports.searchVolunteers = async (req, res) => {
     try {
-        const {skill, availability} = req.query;
+        const { skill, availability } = req.query;
 
-        const volunteers = await Volunteer.findAll({
-            where: {
-                ...(availability && {availability}),
-            }, include: [{
-                model: Volunteer, where: skill ? {name: {[Op.like]: `%${skill}%`}} : {}, required: !!skill
-            }]
-        });
+        const whereClause = {};
+        if (availability) {
+            whereClause.availability = availability;
+        }
+        if (skill) {
+            whereClause.skills = {
+                [Op.overlap]: [skill]
+            };
+        }
+
+        const volunteers = await Volunteer.findAll({where: whereClause});
 
         res.status(HTTP_STATUS.OK).json(volunteers);
+
     } catch (error) {
         handleError(res, error);
     }
@@ -274,16 +275,19 @@ exports.updateVolunteerById = async (req, res) => {
  */
 exports.applyToHelpRequest = async (req, res) => {
     try {
-        const volunteerId = req.user.id;
-        const helpRequestId = req.params.id;
+        const volunteer = await Volunteer.findOne({where: {userId: req.user.id}});
+        if (!volunteer) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Volunteer not found'});
 
+        const helpRequestId = req.params.id;
         const helpRequest = await OrphanageHelpRequest.findByPk(helpRequestId);
         if (!helpRequest) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Help request not found'});
 
-        const existingApplication = await VolunteerHelpRequest.findOne({where: {volunteerId, helpRequestId}});
+        const existingApplication = await VolunteerHelpRequest.findOne({
+            where: {volunteerId: volunteer.id, helpRequestId}
+        });
         if (existingApplication) return res.status(HTTP_STATUS.BAD_REQUEST).json({message: 'You already applied to this help request'});
 
-        await VolunteerHelpRequest.create({volunteerId, helpRequestId});
+        await VolunteerHelpRequest.create({volunteerId: volunteer.id, helpRequestId});
 
         return res.status(HTTP_STATUS.CREATED).json({message: 'Application submitted successfully'});
     } catch (error) {
@@ -303,10 +307,13 @@ exports.applyToHelpRequest = async (req, res) => {
  */
 exports.getVolunteerApplications = async (req, res) => {
     try {
-        const volunteerId = req.user.id;
-
+        const volunteer = await Volunteer.findOne({where: {userId: req.user.id}});
         const applications = await VolunteerHelpRequest.findAll({
-            where: {volunteerId}, include: [OrphanageHelpRequest]
+            where: {volunteerId : volunteer.id},
+            // include: {
+            //     model: OrphanageHelpRequest,
+            //     through: { attributes: [] }
+            // }
         })
 
         return res.status(HTTP_STATUS.OK).json(applications);
@@ -329,11 +336,11 @@ exports.getVolunteerApplications = async (req, res) => {
  */
 exports.cancelApplication = async (req, res) => {
     try {
-        const volunteerId = req.user.id;
+        const volunteerId = req.params.id;
         const applicationId = req.params.applicationId;
 
         const application = await VolunteerHelpRequest.findOne({
-            where: {volunteerId, helpRequestId: applicationId}
+            where: {volunteerId : volunteerId, helpRequestId: applicationId}
         });
 
         if (!application) return res.status(HTTP_STATUS.NOT_FOUND).json({message: 'Application not found'});
@@ -367,7 +374,7 @@ exports.matchVolunteerToOpportunities = async (req, res) => {
 
         const {preferredLocation, skills, availability} = volunteer;
 
-        if (!preferredLocation || !Array.isArray(skills) || skills.length === 0 || !availability) {
+        if (!preferredLocation || !skills || !availability) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({
                 message: 'Volunteer profile is incomplete for matching (location, skills, or availability missing)'
             });
@@ -375,9 +382,11 @@ exports.matchVolunteerToOpportunities = async (req, res) => {
 
         const matches = await OrphanageHelpRequest.findAll({
             where: {
-                preferredLocation, requiredSkills: {
+                preferredLocation,
+                requiredSkills: {
                     [Op.overlap]: skills
-                }, availability
+                },
+                availability
             }
         });
 
